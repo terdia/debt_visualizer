@@ -45,30 +45,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png",
-      "fonts": [
-        {
-          "asset": "./node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf",
-          "outDir": "fonts"
-        },
-        {
-          "asset": "./node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome.ttf",
-          "outDir": "fonts"
-        },
-        {
-          "asset": "./node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.ttf",
-          "outDir": "fonts"
-        },
-        {
-          "asset": "./node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf",
-          "outDir": "fonts"
-        }
-      ],
-      "build": {
-        "babel": {
-          "include": ["@expo/vector-icons"]
-        }
-      }
+      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
       "expo-router",
