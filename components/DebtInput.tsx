@@ -8,6 +8,9 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -191,178 +194,184 @@ export default function DebtInput({ onCalculate, onClearForm, initialData }: Deb
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.cardBackground }]}>
-      <Text style={[styles.title, { color: colors.text }]}>Enter Your Debt Details</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={[styles.container, { backgroundColor: colors.cardBackground }]}>
+          <Text style={[styles.title, { color: colors.text }]}>Enter Your Debt Details</Text>
 
-      <View style={styles.currencySection}>
-        <Text style={[styles.label, { color: colors.text }]}>Select Currency</Text>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.currencyScroll}
-          contentContainerStyle={styles.currencyContainer}>
-          {CURRENCIES.map((currency) => (
-            <Pressable
-              key={currency.code}
-              style={[
-                styles.currencyButton,
-                { backgroundColor: colors.inputBackground },
-                selectedCurrency.code === currency.code && { backgroundColor: colors.primary },
-              ]}
-              onPress={() => setSelectedCurrency(currency)}>
-              <Text style={[
-                styles.currencyButtonText,
-                { color: colors.textSecondary },
-                selectedCurrency.code === currency.code && { color: 'white' },
-              ]}>
-                {currency.code} {currency.symbol}
+          <View style={styles.currencySection}>
+            <Text style={[styles.label, { color: colors.text }]}>Select Currency</Text>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              style={styles.currencyScroll}
+              contentContainerStyle={styles.currencyContainer}>
+              {CURRENCIES.map((currency) => (
+                <Pressable
+                  key={currency.code}
+                  style={[
+                    styles.currencyButton,
+                    { backgroundColor: colors.inputBackground },
+                    selectedCurrency.code === currency.code && { backgroundColor: colors.primary },
+                  ]}
+                  onPress={() => setSelectedCurrency(currency)}>
+                  <Text style={[
+                    styles.currencyButtonText,
+                    { color: colors.textSecondary },
+                    selectedCurrency.code === currency.code && { color: 'white' },
+                  ]}>
+                    {currency.code} {currency.symbol}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+          
+          <View style={styles.requiredSection}>
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Total Debt {selectedCurrency.symbol} <Text style={styles.required}>*</Text>
               </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-      </View>
-      
-      <View style={styles.requiredSection}>
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: colors.text }]}>
-            Total Debt {selectedCurrency.symbol} <Text style={styles.required}>*</Text>
-          </Text>
-          <TextInput
-            style={[styles.input, { 
-              backgroundColor: colors.inputBackground,
-              borderColor: colors.inputBorder,
-              color: colors.text,
-            }]}
-            keyboardType="numeric"
-            value={totalDebt}
-            onChangeText={setTotalDebt}
-            placeholder={`e.g., 10000`}
-            placeholderTextColor={colors.textTertiary}
-          />
+              <TextInput
+                style={[styles.input, { 
+                  backgroundColor: colors.inputBackground,
+                  borderColor: colors.inputBorder,
+                  color: colors.text,
+                }]}
+                keyboardType="numeric"
+                value={totalDebt}
+                onChangeText={setTotalDebt}
+                placeholder={`e.g., 10000`}
+                placeholderTextColor={colors.textTertiary}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Monthly Payment {selectedCurrency.symbol} <Text style={styles.required}>*</Text>
+              </Text>
+              <TextInput
+                style={[styles.input, { 
+                  backgroundColor: colors.inputBackground,
+                  borderColor: colors.inputBorder,
+                  color: colors.text,
+                }]}
+                keyboardType="numeric"
+                value={monthlyPayment}
+                onChangeText={setMonthlyPayment}
+                placeholder={`e.g., 500`}
+                placeholderTextColor={colors.textTertiary}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>Interest Rate (% APR)</Text>
+              <TextInput
+                style={[styles.input, { 
+                  backgroundColor: colors.inputBackground,
+                  borderColor: colors.inputBorder,
+                  color: colors.text,
+                }]}
+                keyboardType="numeric"
+                value={interestRate}
+                onChangeText={setInterestRate}
+                placeholder="e.g., 5"
+                placeholderTextColor={colors.textTertiary}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>Amount Paid So Far {selectedCurrency.symbol}</Text>
+              <TextInput
+                style={[styles.input, { 
+                  backgroundColor: colors.inputBackground,
+                  borderColor: colors.inputBorder,
+                  color: colors.text,
+                }]}
+                keyboardType="numeric"
+                value={amountPaid}
+                onChangeText={setAmountPaid}
+                placeholder={`e.g., 2000`}
+                placeholderTextColor={colors.textTertiary}
+              />
+              <Text style={[styles.hint, { color: colors.textTertiary }]}>
+                Track your progress by updating this amount as you pay off your debt
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.optionalSection}>
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Optional Information</Text>
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>Hourly Wage {selectedCurrency.symbol}</Text>
+              <TextInput
+                style={[styles.input, { 
+                  backgroundColor: colors.inputBackground,
+                  borderColor: colors.inputBorder,
+                  color: colors.text,
+                }]}
+                keyboardType="numeric"
+                value={hourlyWage}
+                onChangeText={setHourlyWage}
+                placeholder={`e.g., 15`}
+                placeholderTextColor={colors.textTertiary}
+              />
+              <Text style={[styles.hint, { color: colors.textTertiary }]}>
+                Add your hourly wage to see how many work hours are needed to pay off the debt
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <AnimatedPressable
+              onPressIn={handleResetPressIn}
+              onPressOut={handleResetPressOut}
+              onPress={resetForm}
+              style={[
+                styles.button,
+                {
+                  backgroundColor: colors.danger,
+                  shadowColor: colors.danger,
+                },
+                resetAnimatedStyle
+              ]}>
+              {Platform.OS === 'ios' && (
+                <BlurView
+                  intensity={20}
+                  style={StyleSheet.absoluteFill}
+                  tint={colors.isDark ? 'dark' : 'light'}
+                />
+              )}
+              <Text style={styles.buttonText}>Reset</Text>
+            </AnimatedPressable>
+
+            <AnimatedPressable
+              onPressIn={handleCalculatePressIn}
+              onPressOut={handleCalculatePressOut}
+              onPress={validateAndCalculate}
+              style={[
+                styles.button,
+                {
+                  backgroundColor: colors.primary,
+                  shadowColor: colors.primary,
+                },
+                calculateAnimatedStyle
+              ]}>
+              {Platform.OS === 'ios' && (
+                <BlurView
+                  intensity={20}
+                  style={StyleSheet.absoluteFill}
+                  tint={colors.isDark ? 'dark' : 'light'}
+                />
+              )}
+              <Text style={styles.buttonText}>Calculate</Text>
+            </AnimatedPressable>
+          </View>
         </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: colors.text }]}>
-            Monthly Payment {selectedCurrency.symbol} <Text style={styles.required}>*</Text>
-          </Text>
-          <TextInput
-            style={[styles.input, { 
-              backgroundColor: colors.inputBackground,
-              borderColor: colors.inputBorder,
-              color: colors.text,
-            }]}
-            keyboardType="numeric"
-            value={monthlyPayment}
-            onChangeText={setMonthlyPayment}
-            placeholder={`e.g., 500`}
-            placeholderTextColor={colors.textTertiary}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: colors.text }]}>Interest Rate (% APR)</Text>
-          <TextInput
-            style={[styles.input, { 
-              backgroundColor: colors.inputBackground,
-              borderColor: colors.inputBorder,
-              color: colors.text,
-            }]}
-            keyboardType="numeric"
-            value={interestRate}
-            onChangeText={setInterestRate}
-            placeholder="e.g., 5"
-            placeholderTextColor={colors.textTertiary}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: colors.text }]}>Amount Paid So Far {selectedCurrency.symbol}</Text>
-          <TextInput
-            style={[styles.input, { 
-              backgroundColor: colors.inputBackground,
-              borderColor: colors.inputBorder,
-              color: colors.text,
-            }]}
-            keyboardType="numeric"
-            value={amountPaid}
-            onChangeText={setAmountPaid}
-            placeholder={`e.g., 2000`}
-            placeholderTextColor={colors.textTertiary}
-          />
-          <Text style={[styles.hint, { color: colors.textTertiary }]}>
-            Track your progress by updating this amount as you pay off your debt
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.optionalSection}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Optional Information</Text>
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: colors.text }]}>Hourly Wage {selectedCurrency.symbol}</Text>
-          <TextInput
-            style={[styles.input, { 
-              backgroundColor: colors.inputBackground,
-              borderColor: colors.inputBorder,
-              color: colors.text,
-            }]}
-            keyboardType="numeric"
-            value={hourlyWage}
-            onChangeText={setHourlyWage}
-            placeholder={`e.g., 15`}
-            placeholderTextColor={colors.textTertiary}
-          />
-          <Text style={[styles.hint, { color: colors.textTertiary }]}>
-            Add your hourly wage to see how many work hours are needed to pay off the debt
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <AnimatedPressable
-          onPressIn={handleResetPressIn}
-          onPressOut={handleResetPressOut}
-          onPress={resetForm}
-          style={[
-            styles.button,
-            {
-              backgroundColor: colors.danger,
-              shadowColor: colors.danger,
-            },
-            resetAnimatedStyle
-          ]}>
-          {Platform.OS === 'ios' && (
-            <BlurView
-              intensity={20}
-              style={StyleSheet.absoluteFill}
-              tint={colors.isDark ? 'dark' : 'light'}
-            />
-          )}
-          <Text style={styles.buttonText}>Reset</Text>
-        </AnimatedPressable>
-
-        <AnimatedPressable
-          onPressIn={handleCalculatePressIn}
-          onPressOut={handleCalculatePressOut}
-          onPress={validateAndCalculate}
-          style={[
-            styles.button,
-            {
-              backgroundColor: colors.primary,
-              shadowColor: colors.primary,
-            },
-            calculateAnimatedStyle
-          ]}>
-          {Platform.OS === 'ios' && (
-            <BlurView
-              intensity={20}
-              style={StyleSheet.absoluteFill}
-              tint={colors.isDark ? 'dark' : 'light'}
-            />
-          )}
-          <Text style={styles.buttonText}>Calculate</Text>
-        </AnimatedPressable>
-      </View>
-    </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 

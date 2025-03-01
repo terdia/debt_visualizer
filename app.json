@@ -20,11 +20,21 @@
       "bundleIdentifier": "com.debtfree.visualizer",
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-6615281019642096~6264061999"
+      },
+      "infoPlist": {
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
+        "SKAdNetworkItems": [
+          {
+            "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork"
+          }
+        ]
       }
     },
     "android": {
+      "versionCode": 1,
+      "permissions": [],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.debtfree.visualizer",
@@ -42,7 +52,10 @@
       [
         "expo-ads-admob",
         {
-          "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+          "userTrackingPermission": "This identifier will be used to deliver personalized ads to you.",
+          "android": {
+            "version": "22.1.0"
+          }
         }
       ]
     ],
@@ -52,6 +65,14 @@
     },
     "newArchEnabled": true,
     "description": "A powerful debt management and visualization tool that helps you track and plan your journey to becoming debt-free.",
-    "githubUrl": "https://github.com/yourusername/debtfree-visualizer"
+    "githubUrl": "https://github.com/yourusername/debtfree-visualizer",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "2e511ef1-0f9d-4029-9d68-f194f58a4fd3"
+      }
+    }
   }
 }

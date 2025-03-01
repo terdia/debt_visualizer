@@ -17,9 +17,10 @@
     "@expo/vector-icons": "^14.0.2",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/slider": "4.5.5",
-    "@react-navigation/bottom-tabs": "^6.5.11",
-    "@react-navigation/native": "^6.1.9",
-    "expo": "^52.0.0",
+    "@react-navigation/bottom-tabs": "7.2.0",
+    "@react-navigation/native": "7.0.14",
+    "@react-navigation/native-stack": "7.0.0",
+    "expo": "~52.0.0",
     "expo-ads-admob": "~13.0.0",
     "expo-blur": "~14.0.3",
     "expo-constants": "~17.0.7",
@@ -47,8 +48,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
-    "@types/react": "~18.3.12",
     "@types/jest": "^29.5.0",
+    "@types/react": "~18.3.12",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",
@@ -58,5 +59,15 @@
   },
   "eslintConfig": {
     "extends": "universe/native"
+  },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "react-native-chart-kit",
+          "expo-ads-admob"
+        ]
+      }
+    }
   }
 }

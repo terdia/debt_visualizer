@@ -4,7 +4,6 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
 import { useAppColors } from '../utils/colors';
-import { NavigationContainer } from '@react-navigation/native';
 
 declare global {
   interface Window {
@@ -21,16 +20,14 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <NavigationContainer>
+    <>
       <Stack 
         screenOptions={{ 
           headerShown: false,
           contentStyle: { backgroundColor: colors.background }
         }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
+      />
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-    </NavigationContainer>
+    </>
   );
 }

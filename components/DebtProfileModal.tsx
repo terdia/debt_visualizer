@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { useAppColors } from '../utils/colors';
 import { DebtProfile, DebtProfileInput } from '../types/debt';
@@ -94,188 +95,192 @@ export default function DebtProfileModal({
       animationType="slide"
       transparent={true}
       onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={[styles.modalContent, { backgroundColor: colors.cardBackground }]}>
-          <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>
-              {initialData ? 'Edit Debt Profile' : 'New Debt Profile'}
-            </Text>
-            <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={24} color={colors.textSecondary} />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView style={styles.form}>
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>
-                Profile Name <Text style={styles.required}>*</Text>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: colors.cardBackground }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>
+                {initialData ? 'Edit Debt Profile' : 'New Debt Profile'}
               </Text>
-              <TextInput
-                style={[styles.input, { 
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.inputBorder,
-                  color: colors.text,
-                }]}
-                value={name}
-                onChangeText={setName}
-                placeholder="e.g., Student Loans"
-                placeholderTextColor={colors.textTertiary}
-              />
+              <TouchableOpacity onPress={onClose}>
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </TouchableOpacity>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>Description</Text>
-              <TextInput
-                style={[styles.input, { 
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.inputBorder,
-                  color: colors.text,
-                  height: 80,
-                }]}
-                value={description}
-                onChangeText={setDescription}
-                placeholder="Add some details about this debt"
-                placeholderTextColor={colors.textTertiary}
-                multiline
-                textAlignVertical="top"
-              />
-            </View>
-
-            <View style={styles.currencySection}>
-              <Text style={[styles.label, { color: colors.text }]}>Select Currency</Text>
-              <ScrollView 
-                horizontal 
-                showsHorizontalScrollIndicator={false}
-                style={styles.currencyScroll}
-                contentContainerStyle={styles.currencyContainer}>
-                {CURRENCIES.map((currency) => (
-                  <TouchableOpacity
-                    key={currency.code}
-                    style={[
-                      styles.currencyButton,
-                      { backgroundColor: colors.inputBackground },
-                      selectedCurrency.code === currency.code && { backgroundColor: colors.primary },
-                    ]}
-                    onPress={() => setSelectedCurrency(currency)}>
-                    <Text style={[
-                      styles.currencyButtonText,
-                      { color: colors.textSecondary },
-                      selectedCurrency.code === currency.code && { color: 'white' },
-                    ]}>
-                      {currency.code} {currency.symbol}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>
-                Total Debt {selectedCurrency.symbol} <Text style={styles.required}>*</Text>
-              </Text>
-              <TextInput
-                style={[styles.input, { 
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.inputBorder,
-                  color: colors.text,
-                }]}
-                value={totalDebt}
-                onChangeText={setTotalDebt}
-                keyboardType="numeric"
-                placeholder="e.g., 10000"
-                placeholderTextColor={colors.textTertiary}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>
-                Monthly Payment {selectedCurrency.symbol} <Text style={styles.required}>*</Text>
-              </Text>
-              <TextInput
-                style={[styles.input, { 
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.inputBorder,
-                  color: colors.text,
-                }]}
-                value={monthlyPayment}
-                onChangeText={setMonthlyPayment}
-                keyboardType="numeric"
-                placeholder="e.g., 500"
-                placeholderTextColor={colors.textTertiary}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>Interest Rate (% APR)</Text>
-              <TextInput
-                style={[styles.input, { 
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.inputBorder,
-                  color: colors.text,
-                }]}
-                value={interestRate}
-                onChangeText={setInterestRate}
-                keyboardType="numeric"
-                placeholder="e.g., 5"
-                placeholderTextColor={colors.textTertiary}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>
-                Amount Paid So Far {selectedCurrency.symbol}
-              </Text>
-              <TextInput
-                style={[styles.input, { 
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.inputBorder,
-                  color: colors.text,
-                }]}
-                value={amountPaid}
-                onChangeText={setAmountPaid}
-                keyboardType="numeric"
-                placeholder="e.g., 2000"
-                placeholderTextColor={colors.textTertiary}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>
-                Hourly Wage {selectedCurrency.symbol}
-              </Text>
-              <TextInput
-                style={[styles.input, { 
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.inputBorder,
-                  color: colors.text,
-                }]}
-                value={hourlyWage}
-                onChangeText={setHourlyWage}
-                keyboardType="numeric"
-                placeholder="e.g., 15"
-                placeholderTextColor={colors.textTertiary}
-              />
-            </View>
-          </ScrollView>
-
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: colors.primary }]}
-              onPress={handleSave}>
-              {Platform.OS === 'ios' && (
-                <BlurView
-                  intensity={20}
-                  style={StyleSheet.absoluteFill}
-                  tint={colors.isDark ? 'dark' : 'light'}
+            <ScrollView style={styles.form}>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: colors.text }]}>
+                  Profile Name <Text style={styles.required}>*</Text>
+                </Text>
+                <TextInput
+                  style={[styles.input, { 
+                    backgroundColor: colors.inputBackground,
+                    borderColor: colors.inputBorder,
+                    color: colors.text,
+                  }]}
+                  value={name}
+                  onChangeText={setName}
+                  placeholder="e.g., Student Loans"
+                  placeholderTextColor={colors.textTertiary}
                 />
-              )}
-              <Text style={styles.buttonText}>
-                {initialData ? 'Save Changes' : 'Create Profile'}
-              </Text>
-            </TouchableOpacity>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: colors.text }]}>Description</Text>
+                <TextInput
+                  style={[styles.input, { 
+                    backgroundColor: colors.inputBackground,
+                    borderColor: colors.inputBorder,
+                    color: colors.text,
+                    height: 80,
+                  }]}
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholder="Add some details about this debt"
+                  placeholderTextColor={colors.textTertiary}
+                  multiline
+                  textAlignVertical="top"
+                />
+              </View>
+
+              <View style={styles.currencySection}>
+                <Text style={[styles.label, { color: colors.text }]}>Select Currency</Text>
+                <ScrollView 
+                  horizontal 
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.currencyScroll}
+                  contentContainerStyle={styles.currencyContainer}>
+                  {CURRENCIES.map((currency) => (
+                    <TouchableOpacity
+                      key={currency.code}
+                      style={[
+                        styles.currencyButton,
+                        { backgroundColor: colors.inputBackground },
+                        selectedCurrency.code === currency.code && { backgroundColor: colors.primary },
+                      ]}
+                      onPress={() => setSelectedCurrency(currency)}>
+                      <Text style={[
+                        styles.currencyButtonText,
+                        { color: colors.textSecondary },
+                        selectedCurrency.code === currency.code && { color: 'white' },
+                      ]}>
+                        {currency.code} {currency.symbol}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: colors.text }]}>
+                  Total Debt {selectedCurrency.symbol} <Text style={styles.required}>*</Text>
+                </Text>
+                <TextInput
+                  style={[styles.input, { 
+                    backgroundColor: colors.inputBackground,
+                    borderColor: colors.inputBorder,
+                    color: colors.text,
+                  }]}
+                  value={totalDebt}
+                  onChangeText={setTotalDebt}
+                  keyboardType="numeric"
+                  placeholder="e.g., 10000"
+                  placeholderTextColor={colors.textTertiary}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: colors.text }]}>
+                  Monthly Payment {selectedCurrency.symbol} <Text style={styles.required}>*</Text>
+                </Text>
+                <TextInput
+                  style={[styles.input, { 
+                    backgroundColor: colors.inputBackground,
+                    borderColor: colors.inputBorder,
+                    color: colors.text,
+                  }]}
+                  value={monthlyPayment}
+                  onChangeText={setMonthlyPayment}
+                  keyboardType="numeric"
+                  placeholder="e.g., 500"
+                  placeholderTextColor={colors.textTertiary}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: colors.text }]}>Interest Rate (% APR)</Text>
+                <TextInput
+                  style={[styles.input, { 
+                    backgroundColor: colors.inputBackground,
+                    borderColor: colors.inputBorder,
+                    color: colors.text,
+                  }]}
+                  value={interestRate}
+                  onChangeText={setInterestRate}
+                  keyboardType="numeric"
+                  placeholder="e.g., 5"
+                  placeholderTextColor={colors.textTertiary}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: colors.text }]}>
+                  Amount Paid So Far {selectedCurrency.symbol}
+                </Text>
+                <TextInput
+                  style={[styles.input, { 
+                    backgroundColor: colors.inputBackground,
+                    borderColor: colors.inputBorder,
+                    color: colors.text,
+                  }]}
+                  value={amountPaid}
+                  onChangeText={setAmountPaid}
+                  keyboardType="numeric"
+                  placeholder="e.g., 2000"
+                  placeholderTextColor={colors.textTertiary}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: colors.text }]}>
+                  Hourly Wage {selectedCurrency.symbol}
+                </Text>
+                <TextInput
+                  style={[styles.input, { 
+                    backgroundColor: colors.inputBackground,
+                    borderColor: colors.inputBorder,
+                    color: colors.text,
+                  }]}
+                  value={hourlyWage}
+                  onChangeText={setHourlyWage}
+                  keyboardType="numeric"
+                  placeholder="e.g., 15"
+                  placeholderTextColor={colors.textTertiary}
+                />
+              </View>
+            </ScrollView>
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: colors.primary }]}
+                onPress={handleSave}>
+                {Platform.OS === 'ios' && (
+                  <BlurView
+                    intensity={20}
+                    style={StyleSheet.absoluteFill}
+                    tint={colors.isDark ? 'dark' : 'light'}
+                  />
+                )}
+                <Text style={styles.buttonText}>
+                  {initialData ? 'Save Changes' : 'Create Profile'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
