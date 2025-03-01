@@ -18,7 +18,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.debtfree.visualizer",
-      "jsEngine": "hermes"
+      "jsEngine": "hermes",
+      "hermes": {
+        "enabled": true,
+        "debug": false
+      }
     },
     "android": {
       "versionCode": 1,
