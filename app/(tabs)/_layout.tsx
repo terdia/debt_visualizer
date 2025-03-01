@@ -3,7 +3,6 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform, useColorScheme, View } from 'react-native';
 import { useAppColors } from '../../utils/colors';
-import AdBanner from '../../components/AdBanner';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
