@@ -63,6 +63,47 @@ For additional support or feature requests, please create an issue in our GitHub
 
 DebtFree Visualizer is designed to help you take control of your financial future. Our goal is to make debt management more accessible and less stressful through visual tracking and proven payoff strategies.
 
+## Privacy Policy
+
+Last updated: [02.03.2025]
+
+### Information Collection and Use
+
+DebtFree Visualizer is committed to protecting your privacy. Our app:
+
+- Does not collect any personal information
+- Does not require account creation
+- Stores all data locally on your device
+- Does not track your usage or behavior
+- Does not share any information with third parties
+
+### Data Storage
+
+- All debt information is stored locally on your device
+- No data is transmitted to external servers
+- You maintain full control of your data
+- Data can be deleted by clearing app data or uninstalling the app
+
+### Third-Party Services
+
+DebtFree Visualizer:
+- Does not integrate with third-party services
+- Does not use analytics services
+- Does not contain advertisements
+- Does not use tracking technologies
+
+### Children's Privacy
+
+Our app does not collect any personal information from anyone, including children under 13.
+
+### Changes to This Privacy Policy
+
+We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.
+
+### Contact Us
+
+If you have any questions about this Privacy Policy, please create an issue in our GitHub repository.
+
 ## Version History
 
 - 1.0.0: Initial release
