@@ -5,6 +5,7 @@ import '../services/debt_service.dart';
 import '../services/export_service.dart';
 import '../services/currency_service.dart';
 import '../services/date_service.dart';
+import 'package:intl/intl.dart';
 
 class DebtProvider extends ChangeNotifier {
   final DebtRepository _repository;
@@ -229,12 +230,21 @@ class DebtProvider extends ChangeNotifier {
 
   // Currency formatting methods
   String formatCurrency(double amount, Currency currency, {bool compact = false}) {
-    return _currencyService.formatCurrency(
-      amount,
-      currency,
-      compact: compact,
-      locale: _locale,
-    );
+    if (compact) {
+      // For compact display, use short format (K, M, B)
+      final formatter = NumberFormat.compactCurrency(
+        symbol: currency.symbol,
+        decimalDigits: 0,
+      );
+      return formatter.format(amount);
+    } else {
+      // Standard currency formatting
+      final formatter = NumberFormat.currency(
+        symbol: currency.symbol,
+        decimalDigits: 2,
+      );
+      return formatter.format(amount);
+    }
   }
 
   String formatPercentage(double value) {

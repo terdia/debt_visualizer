@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../models/debt_profile.dart';
@@ -46,24 +47,24 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
     final profiles = provider.profiles;
 
     return Scaffold(
-      backgroundColor: isDarkMode 
+      backgroundColor: widget.isDarkMode 
           ? const Color(0xFF121212) 
           : const Color(0xFFF9F9F9),
       body: CustomScrollView(
         slivers: [
           SliverAppBar.medium(
             title: const Text('Debt Comparison'),
-            backgroundColor: isDarkMode 
+            backgroundColor: widget.isDarkMode 
                 ? Colors.black.withOpacity(0.7) 
                 : Colors.white.withOpacity(0.7),
-            foregroundColor: isDarkMode ? Colors.white : Colors.black87,
+            foregroundColor: widget.isDarkMode ? Colors.white : Colors.black87,
           ),
           SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 Card(
-                  color: isDarkMode 
+                  color: widget.isDarkMode 
                       ? const Color(0xFF1E1E1E)
                       : Colors.white,
                   child: Padding(
@@ -75,27 +76,36 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                           'Select Debts to Compare',
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: isDarkMode ? Colors.white : Colors.black87,
+                            color: widget.isDarkMode ? Colors.white : Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 16),
+                        // Stylized profile selection chips
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
                           children: profiles.map((profile) {
                             final isSelected = _selectedProfiles.contains(profile);
-                            return FilterChip(
-                              label: Text(
-                                profile.name,
-                                style: TextStyle(
-                                  color: isSelected
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              child: FilterChip(
+                                label: Text(
+                                  profile.name,
+                                  style: TextStyle(
+                                    color: isSelected
                                       ? Colors.white
-                                      : (isDarkMode ? Colors.white70 : Colors.black87),
+                                      : (widget.isDarkMode ? Colors.white70 : Colors.black87),
+                                  ),
                                 ),
-                              ),
-                              selectedColor: const Color(0xFF9C27B0),
-                              backgroundColor: isDarkMode ? Colors.black38 : Colors.grey.shade200,
-                              selected: isSelected,
+                                avatar: isSelected 
+                                    ? const Icon(CupertinoIcons.checkmark_circle_fill, size: 16, color: Colors.white)
+                                    : null,
+                                selectedColor: const Color(0xFF9C27B0),
+                                backgroundColor: widget.isDarkMode ? Colors.black38 : Colors.grey.shade200,
+                                shadowColor: Colors.black26,
+                                elevation: isSelected ? 2 : 0,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                selected: isSelected,
                               onSelected: (selected) {
                                 setState(() {
                                   if (selected) {
@@ -106,7 +116,8 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                                   _updateOptimization();
                                 });
                               },
-                            );
+                            ),
+                          );
                           }).toList(),
                         ),
                       ],
@@ -116,33 +127,95 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                 if (_selectedProfiles.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   Card(
-                  color: isDarkMode 
-                      ? const Color(0xFF1E1E1E)
-                      : Colors.white,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    color: widget.isDarkMode 
+                        ? const Color(0xFF1E1E1E)
+                        : Colors.white,
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      const Color(0xFF9C27B0),
+                                      Colors.purple.shade700,
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  CupertinoIcons.wand_stars,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Payment Optimization',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: widget.isDarkMode ? Colors.white : Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
                           Text(
-                            'Payment Optimization',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: isDarkMode ? Colors.white : Colors.black87,
+                            'Set extra payment amount to optimize your debt payoff strategy',
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.white70 : Colors.black54,
+                              fontSize: 13,
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _extraPaymentController,
-                            decoration: InputDecoration(
-                              labelText: 'Available Extra Payment',
-                              border: const OutlineInputBorder(),
-                              prefixText: '\$',
+                          const SizedBox(height: 20),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: widget.isDarkMode ? Colors.black12 : Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: widget.isDarkMode ? Colors.white24 : Colors.black12,
+                                width: 0.5,
+                              ),
                             ),
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
+                            child: TextFormField(
+                              controller: _extraPaymentController,
+                              decoration: InputDecoration(
+                                labelText: 'Extra Monthly Payment',
+                                labelStyle: TextStyle(
+                                  color: widget.isDarkMode ? Colors.white70 : Colors.black54,
+                                  fontSize: 14,
+                                ),
+                                prefixIcon: Icon(
+                                  CupertinoIcons.money_dollar_circle,
+                                  color: const Color(0xFF9C27B0),
+                                  size: 18,
+                                ),
+                                prefixText: '\$',
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                              ),
+                              style: TextStyle(
+                                color: widget.isDarkMode ? Colors.white : Colors.black87,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              onChanged: (value) {
+                                _updateOptimization();
+                              },
                             ),
-                            onChanged: (_) => _updateOptimization(),
                           ),
                           if (_optimizedPayments.isNotEmpty) ...[
                             const SizedBox(height: 24),
@@ -193,6 +266,9 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
     );
 
     return Card(
+      color: widget.isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -202,41 +278,161 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
               'Comparison Results',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: widget.isDarkMode ? Colors.white : Colors.black87,
                   ),
             ),
             if (totalSaved > 0) ...[
               const SizedBox(height: 16),
               _buildSavingsCard(provider, totalSaved, monthsSaved),
-            ],
-            const SizedBox(height: 24),
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: LineChart(
-                LineChartData(
-                  lineBarsData: comparisons.map((comparison) {
-                    return LineChartBarData(
-                      spots: comparison.payoffData
-                          .asMap()
-                          .entries
-                          .map((entry) => FlSpot(
-                                entry.key.toDouble(),
-                                entry.value,
-                              ))
-                          .toList(),
-                      isCurved: true,
-                      dotData: const FlDotData(show: false),
-                    );
-                  }).toList(),
-                  gridData: const FlGridData(show: true),
-                  titlesData: const FlTitlesData(show: true),
-                  borderData: FlBorderData(show: true),
+              Container(
+                height: 220,
+                padding: const EdgeInsets.only(top: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: widget.isDarkMode ? Colors.black.withOpacity(0.3) : Colors.white.withOpacity(0.9),
+                ),
+                margin: const EdgeInsets.symmetric(vertical: 16),
+                child: LineChart(
+                  LineChartData(
+                    lineBarsData: comparisons.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final comparison = entry.value;
+                      final colors = [
+                        const Color(0xFF9C27B0), // Purple
+                        const Color(0xFF00BCD4), // Cyan
+                        const Color(0xFFFFC107), // Amber
+                        const Color(0xFF4CAF50), // Green
+                        const Color(0xFFF44336), // Red
+                      ];
+                      return LineChartBarData(
+                        spots: comparison.payoffData
+                            .asMap()
+                            .entries
+                            .map((entry) => FlSpot(
+                                  entry.key.toDouble(),
+                                  entry.value,
+                                ))
+                            .toList(),
+                        isCurved: true,
+                        color: colors[index % colors.length],
+                        barWidth: 3,
+                        isStrokeCapRound: true,
+                        dotData: FlDotData(
+                          show: false,
+                          getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
+                            radius: 3,
+                            color: colors[entry.key % colors.length],
+                            strokeWidth: 1,
+                            strokeColor: Colors.white,
+                          ),
+                        ),
+                        belowBarData: BarAreaData(
+                          show: true,
+                          color: colors[index % colors.length].withOpacity(0.15),
+                        ),
+                      );
+                    }).toList(),
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: true,
+                      getDrawingHorizontalLine: (value) => FlLine(
+                        color: widget.isDarkMode ? Colors.white24 : Colors.black12,
+                        strokeWidth: 0.5,
+                      ),
+                      getDrawingVerticalLine: (value) => FlLine(
+                        color: widget.isDarkMode ? Colors.white24 : Colors.black12,
+                        strokeWidth: 0.5,
+                      ),
+                    ),
+                    titlesData: FlTitlesData(
+                      show: true,
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 22,
+                          getTitlesWidget: (value, meta) {
+                            if (value % 6 == 0) { // Show every 6 months
+                              return SideTitleWidget(
+                                axisSide: meta.axisSide,
+                                child: Text(
+                                  '${value.toInt()}m',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    color: widget.isDarkMode ? Colors.white70 : Colors.black54,
+                                  ),
+                                ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                      ),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 30,
+                          getTitlesWidget: (value, meta) {
+                            final currency = _selectedProfiles.first.currency;
+                            final compact = provider.formatCurrency(value, currency, compact: true);
+                            return SideTitleWidget(
+                              axisSide: meta.axisSide,
+                              child: Text(
+                                compact,
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: widget.isDarkMode ? Colors.white70 : Colors.black54,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    ),
+                    borderData: FlBorderData(show: false),
+                    lineTouchData: LineTouchData(
+                      touchTooltipData: LineTouchTooltipData(
+                        tooltipBgColor: widget.isDarkMode ? Colors.grey[800]! : Colors.white,
+                        tooltipBorder: BorderSide(
+                          color: widget.isDarkMode ? Colors.white10 : Colors.black12,
+                          width: 0.5,
+                        ),
+                        tooltipRoundedRadius: 12,
+                        getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
+                          return touchedBarSpots.map((barSpot) {
+                            final index = barSpot.barIndex;
+                            final profile = comparisons[index].profile;
+                            return LineTooltipItem(
+                              '${profile.name}\n',
+                              TextStyle(
+                                color: widget.isDarkMode ? Colors.white : Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: provider.formatCurrency(barSpot.y, profile.currency),
+                                  style: TextStyle(
+                                    color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
+                            );
+                          }).toList();
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
             const SizedBox(height: 24),
             ...comparisons.map((comparison) {
               return _buildComparisonCard(provider, comparison);
-            }),
+            }).toList(),
           ],
         ),
       ),
@@ -308,42 +504,105 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
     final theme = Theme.of(context);
     final profile = comparison.profile;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            profile.name,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: isDarkMode ? Colors.white : Colors.black87,
-            ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
-          const SizedBox(height: 8),
-          _buildMetricRow(
-            provider,
-            'Time to Payoff:',
-            provider.formatDuration(comparison.monthsToPayoff),
-          ),
-          _buildMetricRow(
-            provider,
-            'Total Interest:',
-            provider.formatCurrency(comparison.totalInterest, profile.currency),
-            color: theme.colorScheme.error,
-          ),
-          _buildMetricRow(
-            provider,
-            'Monthly Payment:',
-            provider.formatCurrency(comparison.monthlyPayment, profile.currency),
-          ),
-          _buildMetricRow(
-            provider,
-            'Effective Rate:',
-            provider.formatPercentage(comparison.effectiveInterestRate),
-          ),
-          const Divider(),
         ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF9C27B0).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    CupertinoIcons.creditcard_fill,
+                    color: const Color(0xFF9C27B0),
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    profile.name,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Metrics grid in 2x2 layout for better visualization
+            Row(
+              children: [
+                Expanded(
+                  child: _buildMetricBox(
+                    provider,
+                    title: 'Time to Payoff',
+                    value: provider.formatDuration(comparison.monthsToPayoff),
+                    icon: CupertinoIcons.time,
+                    color: const Color(0xFF9C27B0),
+                    isDarkMode: isDarkMode,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildMetricBox(
+                    provider,
+                    title: 'Total Interest',
+                    value: provider.formatCurrency(comparison.totalInterest, profile.currency),
+                    icon: CupertinoIcons.money_dollar_circle,
+                    color: theme.colorScheme.error,
+                    isDarkMode: isDarkMode,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildMetricBox(
+                    provider,
+                    title: 'Monthly Payment',
+                    value: provider.formatCurrency(comparison.monthlyPayment, profile.currency),
+                    icon: CupertinoIcons.calendar_badge_plus,
+                    color: Colors.blue,
+                    isDarkMode: isDarkMode,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildMetricBox(
+                    provider,
+                    title: 'Effective Rate',
+                    value: provider.formatPercentage(comparison.effectiveInterestRate),
+                    icon: CupertinoIcons.percent,
+                    color: Colors.green,
+                    isDarkMode: isDarkMode,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -371,6 +630,55 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
             style: TextStyle(
               fontWeight: FontWeight.w500,
               color: color ?? (isDarkMode ? Colors.white : Colors.black87),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // Apple-inspired metric box with icon and value
+  Widget _buildMetricBox(
+    DebtProvider provider, {
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+    required bool isDarkMode,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+      decoration: BoxDecoration(
+        color: widget.isDarkMode ? Colors.black.withOpacity(0.2) : color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 14, color: color),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  title,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: widget.isDarkMode ? Colors.white60 : Colors.black54,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: widget.isDarkMode ? Colors.white : Colors.black87,
             ),
           ),
         ],
