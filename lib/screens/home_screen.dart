@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
+import '../services/theme_service.dart';
+
 import '../providers/debt_provider.dart';
 import '../widgets/debt_visualization.dart';
 import '../models/debt_profile.dart';
@@ -42,6 +44,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
     
     _controller.forward();
+    
+    // Load saved dark mode preference
+    _isDarkMode = ThemeService.isDarkMode();
     
     // Initialize screens with current dark mode state
     _updateScreens();
@@ -208,6 +213,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               // Toggle dark mode and rebuild the UI
               setState(() {
                 _isDarkMode = !_isDarkMode;
+                // Save the preference
+                ThemeService.setDarkMode(_isDarkMode);
                 // Update screens with new dark mode state
                 _updateScreens();
               });

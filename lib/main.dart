@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'config/constants.dart';
 import 'providers/debt_provider.dart';
 import 'repositories/repository_factory.dart';
 import 'services/debt_service.dart';
+import 'services/theme_service.dart';
 import 'screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Hive
+  await Hive.initFlutter();
+  
+  // Initialize Theme Service
+  await ThemeService.initialize();
 
   // Initialize configuration
   final appConfig = AppConfig();
