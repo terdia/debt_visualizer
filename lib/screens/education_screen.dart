@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
 
 class EducationScreen extends StatelessWidget {
-  const EducationScreen({super.key});
+  final bool isDarkMode;
+  
+  const EducationScreen({super.key, this.isDarkMode = false});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: isDarkMode 
+          ? const Color(0xFF121212) 
+          : const Color(0xFFF9F9F9),
       body: CustomScrollView(
         slivers: [
           SliverAppBar.medium(
             title: const Text('Debt Education'),
-            backgroundColor: theme.colorScheme.surface,
+            backgroundColor: isDarkMode 
+                ? Colors.black.withOpacity(0.7) 
+                : Colors.white.withOpacity(0.7),
+            foregroundColor: isDarkMode ? Colors.white : Colors.black87,
           ),
           SliverPadding(
             padding: const EdgeInsets.all(16),
@@ -125,6 +133,7 @@ class EducationScreen extends StatelessWidget {
     required List<Widget> children,
   }) {
     final theme = Theme.of(context);
+    final isLocalDarkMode = isDarkMode;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,13 +142,14 @@ class EducationScreen extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: theme.colorScheme.primary,
+              color: const Color(0xFF9C27B0),
             ),
             const SizedBox(width: 8),
             Text(
               title,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: isLocalDarkMode ? Colors.white : Colors.black87,
               ),
             ),
           ],
@@ -157,13 +167,17 @@ class EducationScreen extends StatelessWidget {
     required List<String> items,
   }) {
     final theme = Theme.of(context);
+    final isLocalDarkMode = isDarkMode;
 
     return Card(
       elevation: 0,
+      color: isLocalDarkMode 
+          ? const Color(0xFF1E1E1E)
+          : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: theme.colorScheme.outlineVariant,
+          color: isLocalDarkMode ? Colors.white10 : Colors.black12,
         ),
       ),
       child: Padding(
@@ -175,12 +189,15 @@ class EducationScreen extends StatelessWidget {
               title,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: isLocalDarkMode ? Colors.white : Colors.black87,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               content,
-              style: theme.textTheme.bodyMedium,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: isLocalDarkMode ? Colors.white70 : Colors.black87,
+              ),
             ),
             const SizedBox(height: 16),
             ...items.map((item) => Padding(
@@ -191,13 +208,15 @@ class EducationScreen extends StatelessWidget {
                   Icon(
                     Icons.check_circle,
                     size: 16,
-                    color: theme.colorScheme.primary,
+                    color: const Color(0xFF9C27B0),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       item,
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: isLocalDarkMode ? Colors.white70 : Colors.black87,
+                      ),
                     ),
                   ),
                 ],

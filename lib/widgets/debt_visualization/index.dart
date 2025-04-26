@@ -98,84 +98,189 @@ class DebtVisualizationView extends StatelessWidget {
     final dateFormatter = _getMonthYearFormatter();
     final formattedDate = dateFormatter.format(debtFreeDate);
     
-    // Prepare stats cards
-    final statCards = [
-      // Monthly payment card
-      StatCard(
-        title: 'Monthly Payment',
-        value: profile.currency.symbol + monthlyPayment.toStringAsFixed(0),
-        subtitle: 'Current monthly payment',
-        icon: Icons.calendar_today,
-        gradientStartColor: gradients[0][0],
-        gradientEndColor: gradients[0][1],
-        isDarkMode: isDarkMode,
-      ),
-      
-      // Interest paid card - ensure it's displayed as a positive number
-      StatCard(
-        title: 'Interest Cost',
-        value: profile.currency.symbol + interestPaid.toStringAsFixed(0),
-        subtitle: 'Total interest over loan life',
-        icon: Icons.attach_money,
-        gradientStartColor: gradients[1][0],
-        gradientEndColor: gradients[1][1],
-        isDarkMode: isDarkMode,
-      ),
-      
-      // Months remaining card
-      StatCard(
-        title: 'Time to Freedom',
-        value: '$monthsRemaining months',
-        subtitle: 'Until debt-free',
-        icon: Icons.hourglass_empty,
-        gradientStartColor: gradients[2][0],
-        gradientEndColor: gradients[2][1],
-        isDarkMode: isDarkMode,
-      ),
-      
-      // Debt-free date card
-      StatCard(
-        title: 'Debt-Free Date',
-        value: formattedDate,
-        subtitle: 'Estimated completion',
-        icon: Icons.event_available,
-        gradientStartColor: gradients[3][0],
-        gradientEndColor: gradients[3][1],
-        isDarkMode: isDarkMode,
-      ),
+    // Prepare data for compact stats view
+    final statData = [
+      // Monthly payment
+      {
+        'title': 'Monthly Payment',
+        'value': profile.currency.symbol + monthlyPayment.toStringAsFixed(0),
+        'subtitle': 'Current payment',
+        'icon': Icons.calendar_today,
+        'colors': gradients[0],
+      },
+      // Interest cost
+      {
+        'title': 'Interest Cost',
+        'value': profile.currency.symbol + interestPaid.toStringAsFixed(0),
+        'subtitle': 'Total interest',
+        'icon': Icons.attach_money,
+        'colors': gradients[1],
+      },
+      // Time to freedom
+      {
+        'title': 'Time to Freedom',
+        'value': '$monthsRemaining months',
+        'subtitle': 'Until debt-free',
+        'icon': Icons.hourglass_empty,
+        'colors': gradients[2],
+      },
+      // Debt-free date
+      {
+        'title': 'Debt-Free Date',
+        'value': formattedDate,
+        'subtitle': 'Est. completion',
+        'icon': Icons.event_available,
+        'colors': gradients[3],
+      },
     ];
     
-    // Add work hours card if hourly wage is available
+    // Add work hours if available
     if (workHours != null) {
-      final formattedHours = workHours.round().toString();
-      final hoursCard = StatCard(
-        title: 'Work Hours',
-        value: formattedHours,
-        subtitle: 'Hours needed to pay off debt',
-        icon: Icons.work,
-        gradientStartColor: gradients[4][0],
-        gradientEndColor: gradients[4][1],
-        isDarkMode: isDarkMode,
-      );
-      
-      // Add the work hours card as the fifth card
-      statCards.add(hoursCard);
+      statData.add({
+        'title': 'Work Hours',
+        'value': workHours.round().toString(),
+        'subtitle': 'Hours to pay off',
+        'icon': Icons.work,
+        'colors': gradients[4],
+      });
     }
     
-    // Calculate the cross axis count based on screen width
-    // Use 3 cards per row if screen is wide and we have 5 or more cards
-    int crossAxisCount = 2;
-    if (MediaQuery.of(context).size.width > 900) {
-      crossAxisCount = statCards.length >= 5 ? 3 : (statCards.length >= 4 ? 4 : 2);
+    // Use more columns on wider screens
+    final screenWidth = MediaQuery.of(context).size.width;
+    int crossAxisCount;
+    
+    if (screenWidth > 900) {
+      // Wide desktop - 5 columns if we have 5 stats
+      crossAxisCount = statData.length >= 5 ? 5 : statData.length;
+    } else if (screenWidth > 600) {
+      // Tablet - 3 columns
+      crossAxisCount = 3;
+    } else {
+      // Phone - 2 columns
+      crossAxisCount = 2;
     }
     
-    return GridView.count(
-      crossAxisCount: crossAxisCount,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
+    // Reduced spacing between cards
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: 10, // Reduced from 16
+        mainAxisSpacing: 10,  // Reduced from 16
+        childAspectRatio: 1.5, // Make cards wider to prevent overflow
+      ),
+      itemCount: statData.length,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      children: statCards,
+      itemBuilder: (context, index) {
+        final data = statData[index];
+        return CompactStatCard(
+          title: data['title'] as String,
+          value: data['value'] as String,
+          subtitle: data['subtitle'] as String,
+          icon: data['icon'] as IconData,
+          gradientStartColor: (data['colors'] as List<Color>)[0],
+          gradientEndColor: (data['colors'] as List<Color>)[1],
+          isDarkMode: isDarkMode,
+        );
+      },
+    );
+  }
+  
+  /// A more compact version of the stat card widget
+  Widget CompactStatCard({
+    required String title, 
+    required String value, 
+    required String subtitle,
+    required IconData icon,
+    required Color gradientStartColor,
+    required Color gradientEndColor,
+    required bool isDarkMode,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            gradientStartColor,
+            gradientEndColor,
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8), // Further reduced padding
+        child: Column(
+          mainAxisSize: MainAxisSize.min, // Use minimum vertical space
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title and icon in a more compact row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible( // Make text flexible to prevent overflow
+                  child: Text(
+                    title,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12, // Even smaller title font
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(4), // Smaller icon container
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: Colors.white,
+                    size: 14, // Smaller icon
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6), // Reduced spacing
+            // Main value
+            Text(
+              value,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20, // Smaller value font
+              ),
+            ),
+            const SizedBox(height: 4),
+            // Subtitle in pill
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                subtitle,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 10, // Smaller subtitle font
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
   

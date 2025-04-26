@@ -6,7 +6,9 @@ import '../providers/debt_provider.dart';
 import '../services/comparison_service.dart';
 
 class ComparisonScreen extends StatefulWidget {
-  const ComparisonScreen({super.key});
+  final bool isDarkMode;
+  
+  const ComparisonScreen({super.key, this.isDarkMode = false});
 
   @override
   State<ComparisonScreen> createState() => _ComparisonScreenState();
@@ -38,22 +40,32 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = widget.isDarkMode;
     final theme = Theme.of(context);
     final provider = context.watch<DebtProvider>();
     final profiles = provider.profiles;
 
     return Scaffold(
+      backgroundColor: isDarkMode 
+          ? const Color(0xFF121212) 
+          : const Color(0xFFF9F9F9),
       body: CustomScrollView(
         slivers: [
           SliverAppBar.medium(
             title: const Text('Debt Comparison'),
-            backgroundColor: theme.colorScheme.surface,
+            backgroundColor: isDarkMode 
+                ? Colors.black.withOpacity(0.7) 
+                : Colors.white.withOpacity(0.7),
+            foregroundColor: isDarkMode ? Colors.white : Colors.black87,
           ),
           SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 Card(
+                  color: isDarkMode 
+                      ? const Color(0xFF1E1E1E)
+                      : Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -63,6 +75,7 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                           'Select Debts to Compare',
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w600,
+                            color: isDarkMode ? Colors.white : Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -72,7 +85,16 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                           children: profiles.map((profile) {
                             final isSelected = _selectedProfiles.contains(profile);
                             return FilterChip(
-                              label: Text(profile.name),
+                              label: Text(
+                                profile.name,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : (isDarkMode ? Colors.white70 : Colors.black87),
+                                ),
+                              ),
+                              selectedColor: const Color(0xFF9C27B0),
+                              backgroundColor: isDarkMode ? Colors.black38 : Colors.grey.shade200,
                               selected: isSelected,
                               onSelected: (selected) {
                                 setState(() {
@@ -94,6 +116,9 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                 if (_selectedProfiles.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   Card(
+                  color: isDarkMode 
+                      ? const Color(0xFF1E1E1E)
+                      : Colors.white,
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -103,6 +128,7 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                             'Payment Optimization',
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w600,
+                              color: isDarkMode ? Colors.white : Colors.black87,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -222,14 +248,28 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
     double totalSaved,
     int monthsSaved,
   ) {
+    final isDarkMode = widget.isDarkMode;
     final theme = Theme.of(context);
     final currency = _selectedProfiles.first.currency;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer,
+        gradient: LinearGradient(
+          colors: isDarkMode
+              ? [const Color(0xFF4A148C), const Color(0xFF7B1FA2)]
+              : [const Color(0xFF9C27B0), const Color(0xFFAB47BC)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,21 +277,22 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
           Text(
             'Potential Savings with Optimization',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onPrimaryContainer,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             provider.formatCurrency(totalSaved, currency),
             style: theme.textTheme.headlineMedium?.copyWith(
-              color: theme.colorScheme.onPrimaryContainer,
+              color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
           ),
           Text(
             'and ${provider.formatDuration(monthsSaved)} faster payoff',
             style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onPrimaryContainer,
+              color: Colors.white.withOpacity(0.9),
             ),
           ),
         ],
@@ -263,6 +304,7 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
     DebtProvider provider,
     DebtComparison comparison,
   ) {
+    final isDarkMode = widget.isDarkMode;
     final theme = Theme.of(context);
     final profile = comparison.profile;
 
@@ -275,6 +317,7 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
             profile.name,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
+              color: isDarkMode ? Colors.white : Colors.black87,
             ),
           ),
           const SizedBox(height: 8),
@@ -311,17 +354,23 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
     String value, {
     Color? color,
   }) {
+    final isDarkMode = widget.isDarkMode;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label),
+          Text(
+            label,
+            style: TextStyle(
+              color: isDarkMode ? Colors.white70 : Colors.black87,
+            ),
+          ),
           Text(
             value,
             style: TextStyle(
               fontWeight: FontWeight.w500,
-              color: color,
+              color: color ?? (isDarkMode ? Colors.white : Colors.black87),
             ),
           ),
         ],

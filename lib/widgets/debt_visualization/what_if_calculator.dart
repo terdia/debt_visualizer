@@ -149,8 +149,10 @@ class WhatIfCalculator extends StatelessWidget {
                         overlayColor: Colors.white.withOpacity(0.2),
                       ),
                       child: Slider(
-                        value: extraPayment,
-                        max: profile.monthlyPayment * 2,
+                        // Use a higher max value - 5x monthly payment for more flexibility
+                        value: extraPayment.clamp(0.0, profile.monthlyPayment * 5),
+                        min: 0.0,
+                        max: profile.monthlyPayment * 5,
                         onChanged: onExtraPaymentChanged,
                       ),
                     ),
@@ -165,7 +167,7 @@ class WhatIfCalculator extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '${CurrencyFormatter.format(profile.monthlyPayment * 2, profile.currency)}',
+                          '${CurrencyFormatter.format(profile.monthlyPayment * 5, profile.currency)}',
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.7),
                             fontSize: 12,

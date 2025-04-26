@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import '../models/debt_profile.dart';
 
 class DebtComparison {
@@ -111,8 +112,8 @@ class ComparisonService {
 
     // Calculate months to payoff using amortization formula
     final monthsToPayoff = balance > 0
-        ? (log(monthlyPayment / (monthlyPayment - balance * monthlyRate)) /
-                log(1 + monthlyRate))
+        ? (math.log(monthlyPayment / (monthlyPayment - balance * monthlyRate)) /
+                math.log(1 + monthlyRate))
             .ceil()
         : 0;
 
@@ -146,9 +147,4 @@ class ComparisonService {
       payoffData: payoffData,
     );
   }
-}
-
-/// Extension method for double to calculate logarithm
-extension on double {
-  double log(double x) => log(x) / ln10;
 }

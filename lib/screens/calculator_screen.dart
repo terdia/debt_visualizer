@@ -5,7 +5,9 @@ import '../models/debt_profile.dart';
 import '../services/debt_service.dart';
 
 class CalculatorScreen extends StatefulWidget {
-  const CalculatorScreen({super.key});
+  final bool isDarkMode;
+  
+  const CalculatorScreen({super.key, this.isDarkMode = false});
 
   @override
   State<CalculatorScreen> createState() => _CalculatorScreenState();
@@ -43,7 +45,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       interestRate: double.parse(_interestController.text),
       monthlyPayment: double.parse(_paymentController.text),
       amountPaid: 0,
-      currency: const Currency(code: 'USD', symbol: '\$'),
+      currency: const Currency(code: 'USD', symbol: '\$', name: 'US Dollar'),
     );
 
     final extraPayment = double.tryParse(_extraPaymentController.text) ?? 0;
@@ -57,20 +59,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = widget.isDarkMode;
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: isDarkMode 
+          ? const Color(0xFF121212) 
+          : const Color(0xFFF9F9F9),
       body: CustomScrollView(
         slivers: [
           SliverAppBar.medium(
             title: const Text('Debt Calculator'),
-            backgroundColor: theme.colorScheme.surface,
+            backgroundColor: isDarkMode 
+                ? Colors.black.withOpacity(0.7) 
+                : Colors.white.withOpacity(0.7),
+            foregroundColor: isDarkMode ? Colors.white : Colors.black87,
           ),
           SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 Card(
+                  color: isDarkMode 
+                      ? const Color(0xFF1E1E1E)
+                      : Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Form(
@@ -82,6 +94,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             'Enter Debt Details',
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w600,
+                              color: isDarkMode ? Colors.white : Colors.black87,
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -124,11 +137,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     ),
                   ),
                 ),
-                if (_showResults && _calculatedProfile != null) ...[
-                  const SizedBox(height: 24),
-                  _buildResults(theme),
-                ],
               ]),
+            ),
+          ),
+          if (_showResults) SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              child: _buildResults(theme, isDarkMode),
             ),
           ),
         ],
@@ -143,6 +158,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     String? suffix,
     String? Function(String?)? validator,
   }) {
+    final isDarkMode = widget.isDarkMode;
+    
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
@@ -150,6 +167,23 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         border: const OutlineInputBorder(),
         prefixText: prefix,
         suffixText: suffix,
+        labelStyle: TextStyle(
+          color: isDarkMode ? Colors.white70 : Colors.black87,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: isDarkMode ? Colors.white30 : Colors.black26,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: const Color(0xFF9C27B0),
+            width: 2,
+          ),
+        ),
+      ),
+      style: TextStyle(
+        color: isDarkMode ? Colors.white : Colors.black87,
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [
@@ -166,7 +200,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return null;
   }
 
-  Widget _buildResults(ThemeData theme) {
+  Widget _buildResults(ThemeData theme, bool isDarkMode) {
     if (_calculatedProfile == null || _payoffData == null) {
       return const SizedBox.shrink();
     }
@@ -187,6 +221,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final totalPaid = profile.totalDebt + totalInterest;
 
     return Card(
+      color: isDarkMode 
+          ? const Color(0xFF1E1E1E)
+          : Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -196,6 +233,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               'Results',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: isDarkMode ? Colors.white : Colors.black87,
               ),
             ),
             const SizedBox(height: 24),
@@ -227,6 +265,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 'Impact of Extra Payments',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: isDarkMode ? Colors.white : Colors.black87,
                 ),
               ),
               const SizedBox(height: 16),
@@ -252,6 +291,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     Color? color,
     bool bold = false,
   }) {
+    final isDarkMode = widget.isDarkMode;
+    final themeCopy = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -259,13 +300,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         children: [
           Text(
             label,
-            style: theme.textTheme.bodyLarge,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: isDarkMode ? Colors.white70 : Colors.black87,
+            ),
           ),
           Text(
             value,
             style: theme.textTheme.bodyLarge?.copyWith(
               fontWeight: bold ? FontWeight.w600 : null,
-              color: color,
+              color: color ?? (isDarkMode ? Colors.white : Colors.black87),
             ),
           ),
         ],
