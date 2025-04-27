@@ -1,36 +1,74 @@
-# dependencies
+# Flutter/Dart specific
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+
+# IDE specific
+.idea/
+.vscode/
+*.iml
+
+# Native builds
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# iOS specific
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+
+# macOS specific
+.DS_Store
+*.pem
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Dependencies
 node_modules/
 
-# expo
-.expo/
-web-build/
-expo-env.d.ts
+# Environment files
+.env
+.env.*
+!.env.example
 
-# native
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# metro
-.metro-health-check*
-
-# debug
+# Debug files
+*.log
 npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# macos
-.DS_Store
-*.pem
+# Build artifacts
+*.class
+*.pyc
+*.swp
+.buildlog/
+.history
+.svn/
+.idea/
+# Coverage
+coverage/
 
-# local env files
-.env*.local
+# Symbols and maps
+app.*.symbols
+app.*.map.json
 
-# typescript
-*.tsbuildinfo
-ios/
-android/
-.vercel
+# Supabase
+**/supabase/.branches
+**/supabase/.temp
