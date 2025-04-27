@@ -402,7 +402,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
     
     final formatter = NumberFormat.currency(symbol: '\$');
-    final totalInterest = _payoffData!.reduce((a, b) => a + b) - profile.totalDebt;
+    // Calculate total interest correctly
+    // Interest = (Total payments) - Principal
+    final totalInterest = (profile.monthlyPayment + extraPayment) * monthsToPayoff - profile.totalDebt;
     final totalPaid = profile.totalDebt + totalInterest;
 
     return Card(
@@ -503,7 +505,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 theme,
                 label: 'Monthly Savings:',
                 value: formatter.format(
-                  (totalPaid / monthsToPayoff) - profile.monthlyPayment,
+                  profile.monthlyPayment * (_debtService.calculateMonthsToPayoff(profile, extraPayment: 0) - monthsToPayoff),
                 ),
                 color: theme.colorScheme.primary,
               ),
