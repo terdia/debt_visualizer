@@ -78,10 +78,26 @@ class DebtProvider extends ChangeNotifier {
 
   Future<void> createProfile(DebtProfile profile) async {
     await _repository.createProfile(profile);
+    
+    // Force immediate UI update
+    notifyListeners();
+    
+    // Auto-select the newly created profile if there's no currently selected profile
+    if (_selectedProfile == null) {
+      _selectedProfile = profile;
+    }
   }
 
   Future<void> updateProfile(DebtProfile profile) async {
     await _repository.updateProfile(profile);
+    
+    // Force immediate UI update
+    notifyListeners();
+    
+    // If this is the selected profile, update the reference to ensure UI consistency
+    if (_selectedProfile != null && _selectedProfile!.id == profile.id) {
+      _selectedProfile = profile;
+    }
   }
 
   Future<void> deleteProfile(String id) async {
