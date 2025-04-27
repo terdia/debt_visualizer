@@ -167,6 +167,94 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                                   color: widget.isDarkMode ? Colors.white : Colors.black87,
                                 ),
                               ),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text(
+                                        'Payment Optimization',
+                                        style: TextStyle(
+                                          color: widget.isDarkMode ? Colors.white : Colors.black87,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      content: SingleChildScrollView(
+                                        child: ListBody(
+                                          children: [
+                                            Text(
+                                              'This feature uses the Debt Avalanche method:',
+                                              style: TextStyle(
+                                                color: widget.isDarkMode ? Colors.white : Colors.black87,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Text(
+                                              '• Prioritizes debts with higher interest rates',
+                                              style: TextStyle(
+                                                color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+                                              ),
+                                            ),
+                                            Text(
+                                              '• Applies extra payments to most expensive debts first',
+                                              style: TextStyle(
+                                                color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+                                              ),
+                                            ),
+                                            Text(
+                                              '• Minimizes total interest paid over time',
+                                              style: TextStyle(
+                                                color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+                                              ),
+                                            ),
+                                            Text(
+                                              '• Mathematically optimal for reducing costs',
+                                              style: TextStyle(
+                                                color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Text(
+                                              'The amount you enter will be distributed optimally across your debts to save you the most money in interest.',
+                                              style: TextStyle(
+                                                color: widget.isDarkMode ? Colors.white : Colors.black87,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      backgroundColor: widget.isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+                                      elevation: 4,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.of(context).pop(),
+                                          child: Text(
+                                            'Got it',
+                                            style: TextStyle(
+                                              color: const Color(0xFF9C27B0),
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: widget.isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.shade100,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    CupertinoIcons.info,
+                                    color: widget.isDarkMode ? Colors.white70 : Colors.black45,
+                                    size: 14,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -219,20 +307,158 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                           ),
                           if (_optimizedPayments.isNotEmpty) ...[
                             const SizedBox(height: 24),
-                            Text(
-                              'Recommended Distribution',
-                              style: theme.textTheme.titleMedium,
+                            Row(
+                              children: [
+                                Text(
+                                  'Recommended Distribution',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: widget.isDarkMode ? Colors.white : Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                InkWell(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: Text(
+                                          'Recommended Distribution',
+                                          style: TextStyle(
+                                            color: widget.isDarkMode ? Colors.white : Colors.black87,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        content: SingleChildScrollView(
+                                          child: ListBody(
+                                            children: [
+                                              Text(
+                                                'How this works:',
+                                                style: TextStyle(
+                                                  color: widget.isDarkMode ? Colors.white : Colors.black87,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                '• Higher interest debts get priority',
+                                                style: TextStyle(
+                                                  color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+                                                ),
+                                              ),
+                                              Text(
+                                                '• Payments are allocated in order of interest rate',
+                                                style: TextStyle(
+                                                  color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+                                                ),
+                                              ),
+                                              Text(
+                                                '• Once a debt is covered, remaining funds move to the next',
+                                                style: TextStyle(
+                                                  color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 12),
+                                              Text(
+                                                'This approach saves you the most money over time by tackling expensive debts first.',
+                                                style: TextStyle(
+                                                  color: widget.isDarkMode ? Colors.white : Colors.black87,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        backgroundColor: widget.isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+                                        elevation: 4,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(),
+                                            child: Text(
+                                              'Got it',
+                                              style: TextStyle(
+                                                color: const Color(0xFF9C27B0),
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: widget.isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.shade100,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      CupertinoIcons.info,
+                                      color: widget.isDarkMode ? Colors.white70 : Colors.black45,
+                                      size: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 8),
                             ..._selectedProfiles.map((profile) {
                               final extra = _optimizedPayments[profile.id] ?? 0;
-                              return ListTile(
-                                title: Text(profile.name),
-                                subtitle: Text(
-                                  provider.formatCurrency(extra, profile.currency),
+                              return Container(
+                                margin: const EdgeInsets.symmetric(vertical: 6),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: widget.isDarkMode ? Colors.black.withOpacity(0.2) : Colors.grey.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: widget.isDarkMode ? Colors.white24 : Colors.black12,
+                                    width: 0.5,
+                                  ),
                                 ),
-                                trailing: Text(
-                                  'Rate: ${provider.formatPercentage(profile.interestRate)}',
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 6,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            profile.name,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 15,
+                                              color: widget.isDarkMode ? Colors.white : Colors.black87,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Allocation: ${provider.formatCurrency(extra, profile.currency)}',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: widget.isDarkMode ? Colors.white70 : Colors.black54,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 4,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF9C27B0).withOpacity(widget.isDarkMode ? 0.3 : 0.1),
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Text(
+                                          'Rate: ${provider.formatPercentage(profile.interestRate)}',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                            color: widget.isDarkMode ? Colors.white : Colors.black87,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               );
                             }),
