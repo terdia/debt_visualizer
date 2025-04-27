@@ -90,14 +90,126 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Enter Debt Details',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: isDarkMode ? Colors.white : Colors.black87,
-                            ),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      const Color(0xFF9C27B0),
+                                      Colors.purple.shade700,
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.calculate_outlined,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Enter Debt Details',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: isDarkMode ? Colors.white : Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text(
+                                        'Debt Calculator',
+                                        style: TextStyle(
+                                          color: isDarkMode ? Colors.white : Colors.black87,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      content: SingleChildScrollView(
+                                        child: ListBody(
+                                          children: [
+                                            Text(
+                                              'How to use this calculator:',
+                                              style: TextStyle(
+                                                color: isDarkMode ? Colors.white : Colors.black87,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Text(
+                                              '• Enter your total debt amount',
+                                              style: TextStyle(
+                                                color: isDarkMode ? Colors.white70 : Colors.black87,
+                                              ),
+                                            ),
+                                            Text(
+                                              '• Enter the annual interest rate',
+                                              style: TextStyle(
+                                                color: isDarkMode ? Colors.white70 : Colors.black87,
+                                              ),
+                                            ),
+                                            Text(
+                                              '• Enter your regular monthly payment',
+                                              style: TextStyle(
+                                                color: isDarkMode ? Colors.white70 : Colors.black87,
+                                              ),
+                                            ),
+                                            Text(
+                                              '• Optionally add extra monthly payment',
+                                              style: TextStyle(
+                                                color: isDarkMode ? Colors.white70 : Colors.black87,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Text(
+                                              'This will calculate your payoff timeline and total costs.',
+                                              style: TextStyle(
+                                                color: isDarkMode ? Colors.white : Colors.black87,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+                                      elevation: 4,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.of(context).pop(),
+                                          child: Text(
+                                            'Got it',
+                                            style: TextStyle(
+                                              color: const Color(0xFF9C27B0),
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.shade100,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.info_outline,
+                                    color: isDarkMode ? Colors.white70 : Colors.black45,
+                                    size: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
                           _buildTextField(
                             controller: _debtController,
                             label: 'Total Debt Amount',
@@ -125,11 +237,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             prefix: '\$',
                           ),
                           const SizedBox(height: 24),
-                          SizedBox(
+                          Container(
                             width: double.infinity,
-                            child: FilledButton(
+                            child: ElevatedButton(
                               onPressed: _calculate,
-                              child: const Text('Calculate'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF9C27B0),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                elevation: 0,
+                              ),
+                              child: const Text('Calculate', style: TextStyle(fontSize: 16)),
                             ),
                           ),
                         ],
@@ -159,37 +278,48 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     String? Function(String?)? validator,
   }) {
     final isDarkMode = widget.isDarkMode;
+    final iconColor = const Color(0xFF9C27B0);
     
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-        prefixText: prefix,
-        suffixText: suffix,
-        labelStyle: TextStyle(
-          color: isDarkMode ? Colors.white70 : Colors.black87,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: isDarkMode ? Colors.white30 : Colors.black26,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: const Color(0xFF9C27B0),
-            width: 2,
-          ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.black.withOpacity(0.2) : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDarkMode ? Colors.white12 : Colors.black12,
+          width: 0.5,
         ),
       ),
-      style: TextStyle(
-        color: isDarkMode ? Colors.white : Colors.black87,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: prefix != null 
+              ? Icon(prefix == '\$' ? Icons.attach_money : Icons.percent, color: iconColor, size: 20)
+              : null,
+          prefixText: prefix,
+          suffixText: suffix,
+          labelStyle: TextStyle(
+            color: isDarkMode ? Colors.white70 : Colors.black54,
+            fontSize: 14,
+          ),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+        style: TextStyle(
+          color: isDarkMode ? Colors.white : Colors.black87,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+        ],
+        validator: validator,
       ),
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-      ],
-      validator: validator,
     );
   }
 
@@ -224,17 +354,44 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       color: isDarkMode 
           ? const Color(0xFF1E1E1E)
           : Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Results',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: isDarkMode ? Colors.white : Colors.black87,
-              ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.blue.shade600,
+                        Colors.purple.shade700,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.insights,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Results',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isDarkMode ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             _buildResultRow(
@@ -261,11 +418,29 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
             if (extraPayment > 0) ...[
               const Divider(height: 32),
-              Text(
-                'Impact of Extra Payments',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDarkMode ? Colors.white : Colors.black87,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF9C27B0).withOpacity(isDarkMode ? 0.2 : 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.trending_down,
+                      size: 16,
+                      color: isDarkMode ? Colors.purpleAccent : const Color(0xFF9C27B0),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Impact of Extra Payments',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: isDarkMode ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
@@ -292,9 +467,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     bool bold = false,
   }) {
     final isDarkMode = widget.isDarkMode;
-    final themeCopy = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+    final defaultColor = isDarkMode ? Colors.white : Colors.black87;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.black.withOpacity(0.2) : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color != null 
+              ? color.withOpacity(isDarkMode ? 0.3 : 0.1) 
+              : (isDarkMode ? Colors.white12 : Colors.black12),
+          width: 0.5,
+        ),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -302,13 +489,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             label,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: isDarkMode ? Colors.white70 : Colors.black87,
+              fontWeight: FontWeight.w500,
             ),
           ),
           Text(
             value,
             style: theme.textTheme.bodyLarge?.copyWith(
-              fontWeight: bold ? FontWeight.w600 : null,
-              color: color ?? (isDarkMode ? Colors.white : Colors.black87),
+              fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
+              color: color ?? defaultColor,
             ),
           ),
         ],
