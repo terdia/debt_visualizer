@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import '../services/theme_service.dart';
+import '../services/auth_service.dart';
 
 import '../providers/debt_provider.dart';
 import '../widgets/debt_visualization.dart';
@@ -13,6 +14,8 @@ import 'home/horizontal_profile_selector.dart';
 import 'comparison_screen.dart';
 import 'calculator_screen.dart';
 import 'education_screen.dart';
+import 'subscription_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -200,6 +203,47 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ],
         ),
         actions: [
+          // Premium subscription button
+          IconButton(
+            icon: Icon(
+              CupertinoIcons.star_fill,
+              color: isDarkMode ? Colors.amber : const Color(0xFF9C27B0),
+              size: 22,
+            ),
+            tooltip: 'Premium Features',
+            onPressed: () {
+              // Navigate to subscription screen without requiring authentication
+              // User can view premium features and will be prompted to register if they try to purchase
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => SubscriptionScreen(
+                    // Pass only payment service - auth will be handled in subscription screen
+                    paymentService: Provider.of<DebtProvider>(context, listen: false).getPaymentService(),
+                    isDarkMode: _isDarkMode,
+                  ),
+                ),
+              );
+            },
+          ),
+          // Profile button
+          IconButton(
+            icon: Icon(
+              CupertinoIcons.person_circle,
+              color: _isDarkMode ? Colors.white : Colors.black,
+            ),
+            tooltip: 'Profile',
+            onPressed: () {
+              // Navigate to profile screen
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ProfileScreen(
+                    isDarkMode: _isDarkMode,
+                  ),
+                ),
+              );
+            },
+          ),
+          // Theme toggle button
           IconButton(
             icon: Icon(
               isDarkMode 
@@ -209,6 +253,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   ? Colors.amber 
                   : Colors.blueGrey,
             ),
+            tooltip: isDarkMode ? 'Light Mode' : 'Dark Mode',
             onPressed: () {
               // Toggle dark mode and rebuild the UI
               setState(() {

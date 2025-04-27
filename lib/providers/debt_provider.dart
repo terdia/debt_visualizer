@@ -5,6 +5,8 @@ import '../services/debt_service.dart';
 import '../services/export_service.dart';
 import '../services/currency_service.dart';
 import '../services/date_service.dart';
+import '../services/payment_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 
 class DebtProvider extends ChangeNotifier {
@@ -13,6 +15,8 @@ class DebtProvider extends ChangeNotifier {
   final ExportService _exportService;
   final CurrencyService _currencyService;
   final DateService _dateService;
+  // Lazy-initialized to avoid Supabase client issues
+  PaymentService? _paymentService;
   
   List<DebtProfile> _profiles = [];
   DebtProfile? _selectedProfile;
@@ -347,5 +351,12 @@ class DebtProvider extends ChangeNotifier {
   void dispose() {
     _repository.dispose();
     super.dispose();
+  }
+  
+  /// Get the payment service for in-app purchases
+  PaymentService getPaymentService() {
+    // Lazy initialize the payment service
+    _paymentService ??= PaymentService(Supabase.instance.client);
+    return _paymentService!;
   }
 }
