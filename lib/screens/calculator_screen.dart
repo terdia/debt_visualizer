@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import '../models/debt_profile.dart';
 import '../services/debt_service.dart';
@@ -237,19 +238,73 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             prefix: '\$',
                           ),
                           const SizedBox(height: 24),
-                          Container(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _calculate,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF9C27B0),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                elevation: 0,
+                          Row(
+                            children: [
+                              // Reset button
+                              Expanded(
+                                flex: 1,
+                                child: Container(
+                                  margin: const EdgeInsets.only(right: 8),
+                                  child: OutlinedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        // Clear all input fields
+                                        _debtController.clear();
+                                        _interestController.clear();
+                                        _paymentController.clear();
+                                        _extraPaymentController.text = '0';
+                                        _showResults = false;
+                                        _calculatedProfile = null;
+                                        _payoffData = null;
+                                      });
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      side: BorderSide(
+                                        color: const Color(0xFF9C27B0).withOpacity(0.5),
+                                        width: 1,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          CupertinoIcons.refresh,
+                                          size: 16,
+                                          color: const Color(0xFF9C27B0),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Reset',
+                                          style: TextStyle(
+                                            color: const Color(0xFF9C27B0),
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
-                              child: const Text('Calculate', style: TextStyle(fontSize: 16)),
-                            ),
+                              // Calculate button
+                              Expanded(
+                                flex: 2,
+                                child: Container(
+                                  child: ElevatedButton(
+                                    onPressed: _calculate,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF9C27B0),
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      elevation: 0,
+                                    ),
+                                    child: Text('Calculate', style: TextStyle(fontSize: 16)),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

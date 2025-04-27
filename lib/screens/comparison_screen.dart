@@ -18,8 +18,26 @@ class ComparisonScreen extends StatefulWidget {
 class _ComparisonScreenState extends State<ComparisonScreen> {
   final _comparisonService = ComparisonService();
   final _extraPaymentController = TextEditingController(text: '0');
-  List<DebtProfile> _selectedProfiles = [];
+  // Store profile IDs instead of profile objects for better update handling
+  List<String> _selectedProfileIds = [];
   Map<String, double> _optimizedPayments = {};
+  
+  // Get currently selected profiles from their IDs
+  List<DebtProfile> get _selectedProfiles {
+    final provider = Provider.of<DebtProvider>(context, listen: false);
+    final result = <DebtProfile>[];
+    
+    for (final id in _selectedProfileIds) {
+      try {
+        final profile = provider.profiles.firstWhere((profile) => profile.id == id);
+        result.add(profile);
+      } catch (e) {
+        // Profile with this ID no longer exists, ignore it
+      }
+    }
+    
+    return result;
+  }
 
   @override
   void dispose() {
@@ -28,15 +46,32 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
   }
 
   void _updateOptimization() {
-    if (_selectedProfiles.isEmpty) return;
+    final selectedProfiles = _selectedProfiles;
+    if (selectedProfiles.isEmpty) return;
 
     final extraAmount = double.tryParse(_extraPaymentController.text) ?? 0;
-    setState(() {
-      _optimizedPayments = _comparisonService.optimizePayments(
-        _selectedProfiles,
-        extraAmount,
-      );
-    });
+    
+    // Create a new map to force update
+    final newOptimizations = _comparisonService.optimizePayments(
+      selectedProfiles,
+      extraAmount,
+    );
+    
+    // Only trigger setState if the optimizations actually changed
+    if (_optimizedPayments.toString() != newOptimizations.toString()) {
+      setState(() {
+        _optimizedPayments = newOptimizations;
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // This will ensure optimization is recalculated when any profile data changes
+    if (_selectedProfileIds.isNotEmpty) {
+      _updateOptimization();
+    }
   }
 
   @override
@@ -85,7 +120,7 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                           spacing: 8,
                           runSpacing: 8,
                           children: profiles.map((profile) {
-                            final isSelected = _selectedProfiles.contains(profile);
+                            final isSelected = _selectedProfileIds.contains(profile.id);
                             return AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               child: FilterChip(
@@ -109,9 +144,11 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                               onSelected: (selected) {
                                 setState(() {
                                   if (selected) {
-                                    _selectedProfiles.add(profile);
+                                    if (!_selectedProfileIds.contains(profile.id)) {
+                                      _selectedProfileIds.add(profile.id);
+                                    }
                                   } else {
-                                    _selectedProfiles.remove(profile);
+                                    _selectedProfileIds.remove(profile.id);
                                   }
                                   _updateOptimization();
                                 });
@@ -479,15 +516,16 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
   }
 
   Widget _buildComparisonResults(DebtProvider provider) {
-    if (_selectedProfiles.isEmpty) return const SizedBox.shrink();
+    final selectedProfiles = _selectedProfiles;
+    if (selectedProfiles.isEmpty) return const SizedBox.shrink();
 
     final comparisons = _comparisonService.compareProfiles(
-      _selectedProfiles,
+      selectedProfiles,
       extraPayments: _optimizedPayments,
     );
 
     final (totalSaved, monthsSaved) = _comparisonService.calculateOptimizationImpact(
-      _selectedProfiles,
+      selectedProfiles,
       _optimizedPayments,
     );
 
