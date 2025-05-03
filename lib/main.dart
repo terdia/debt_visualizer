@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'config/constants.dart';
 import 'providers/debt_provider.dart';
@@ -36,12 +38,35 @@ void main() async {
   } else {
     print('Supabase not configured. Running in local mode.');
   }
+  
+  // Initialize RevenueCat if configured
+  if (appConfig.isRevenueCatConfigured) {
+    try {
+      // Set log level for debugging
+      await Purchases.setLogLevel(LogLevel.debug);
+      
+      // Get the appropriate API key based on platform
+      final apiKey = Platform.isIOS 
+          ? appConfig.revenueCatIosApiKey 
+          : appConfig.revenueCatAndroidApiKey;
+      
+      // Configure RevenueCat
+      await Purchases.configure(PurchasesConfiguration(apiKey));
+      print('RevenueCat initialized successfully');
+    } catch (e) {
+      print('Failed to initialize RevenueCat: $e');
+    }
+  } else {
+    print('RevenueCat not configured. Subscription features will be limited.');
+  }
 
-  runApp(const MyApp());
+  runApp(MyApp(appConfig: appConfig));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AppConfig appConfig;
+  
+  const MyApp({required this.appConfig, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +74,7 @@ class MyApp extends StatelessWidget {
       create: (_) => DebtProvider(
         repository: RepositoryFactory.getDebtRepository(StorageType.local),
         debtService: DebtService(),
+        supabaseClient: appConfig.isSupabaseConfigured ? Supabase.instance.client : null,
       ),
       child: MaterialApp(
         title: 'Debt Visualizer',

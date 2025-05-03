@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../providers/debt_provider.dart';
-import '../services/payment_service.dart';
+import '../services/revenue_cat_service.dart';
 import '../services/auth_service.dart';
 import 'subscription_screen.dart';
 
@@ -43,28 +43,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _checkAuthStatus() async {
     setState(() => _isLoading = true);
 
-    final debtProvider = Provider.of<DebtProvider>(context, listen: false);
-    final paymentService = debtProvider.getPaymentService();
+    try {
+      final debtProvider = Provider.of<DebtProvider>(context, listen: false);
+      final revenueCatService = debtProvider.getRevenueCatService();
 
-    // Check if user is logged in
-    final isLoggedIn = paymentService.isUserAuthenticated();
-    
-    // If logged in, check subscription status
-    bool isSubscribed = false;
-    if (isLoggedIn && paymentService.supabase != null) {
+      // Safely check if user is logged in
+      bool isLoggedIn = false;
       try {
-        final authService = AuthService(paymentService.supabase!);
-        isSubscribed = await authService.hasActiveSubscription();
+        isLoggedIn = revenueCatService.isUserAuthenticated();
       } catch (e) {
-        print('Error checking subscription: $e');
+        print('Error checking authentication status: $e');
+        // Fallback if RevenueCat is not initialized yet
+        isLoggedIn = false;
+      }
+      
+      // If logged in, check subscription status
+      bool isSubscribed = false;
+      if (isLoggedIn && revenueCatService.supabase != null) {
+        try {
+          final authService = AuthService(revenueCatService.supabase!);
+          isSubscribed = await authService.hasActiveSubscription();
+        } catch (e) {
+          print('Error checking subscription: $e');
+        }
+      }
+      
+      if (mounted) {
+        setState(() {
+          _isLoggedIn = isLoggedIn;
+          _isSubscribed = isSubscribed;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error in checkAuthStatus: $e');
+      if (mounted) {
+        setState(() {
+          _isLoggedIn = false;
+          _isSubscribed = false;
+          _isLoading = false;
+        });
       }
     }
 
-    setState(() {
-      _isLoggedIn = isLoggedIn;
-      _isSubscribed = isSubscribed;
-      _isLoading = false;
-    });
+    // State is now set inside the try-catch block
   }
 
   Future<void> _handleAuth() async {
@@ -80,25 +102,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final debtProvider = Provider.of<DebtProvider>(context, listen: false);
-      final paymentService = debtProvider.getPaymentService();
+      
+      // Safely get RevenueCatService
+      final revenueCatService = debtProvider.getRevenueCatService();
 
-      final success = await paymentService.authenticateUser(
-        email: _emailController.text,
-        password: _passwordController.text,
-        isLogin: _isLogin,
-      );
+      try {
+        final success = await revenueCatService.authenticateUser(
+          email: _emailController.text,
+          password: _passwordController.text,
+          isLogin: _isLogin,
+        );
 
-      if (success) {
-        _emailController.clear();
-        _passwordController.clear();
-        await _checkAuthStatus();
-      } else {
-        setState(() => _errorMessage = 'Authentication failed. Please try again.');
+        if (success) {
+          _emailController.clear();
+          _passwordController.clear();
+          await _checkAuthStatus();
+        } else {
+          setState(() => _errorMessage = 'Authentication failed. Please try again.');
+        }
+      } catch (e) {
+        print('RevenueCat authentication error: $e');
+        setState(() => _errorMessage = 'Authentication service unavailable. Please try again later.');
       }
     } catch (e) {
+      print('Unexpected error in _handleAuth: $e');
       setState(() => _errorMessage = e.toString());
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -107,32 +139,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
     
     try {
       final debtProvider = Provider.of<DebtProvider>(context, listen: false);
-      final paymentService = debtProvider.getPaymentService();
+      final revenueCatService = debtProvider.getRevenueCatService();
       
-      if (paymentService.isSupabaseAvailable() && paymentService.supabase != null) {
-        final authService = AuthService(paymentService.supabase!);
-        await authService.signOut();
-        await _checkAuthStatus();
+      try {
+        if (revenueCatService.isSupabaseAvailable() && revenueCatService.supabase != null) {
+          final authService = AuthService(revenueCatService.supabase!);
+          await authService.signOut();
+          
+          // Also sign out from RevenueCat
+          try {
+            await revenueCatService.signOut();
+          } catch (e) {
+            print('Error signing out from RevenueCat: $e');
+            // Continue even if RevenueCat signout fails
+          }
+          
+          await _checkAuthStatus();
+        }
+      } catch (e) {
+        print('Error during sign out: $e');
+        setState(() => _errorMessage = 'Sign out failed. Please try again.');
       }
     } catch (e) {
+      print('Unexpected error in _handleSignOut: $e');
       setState(() => _errorMessage = e.toString());
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
-  void _navigateToSubscription() {
-    final debtProvider = Provider.of<DebtProvider>(context, listen: false);
-    final paymentService = debtProvider.getPaymentService();
-    
-    Navigator.of(context).push(
-      CupertinoPageRoute(
-        builder: (context) => SubscriptionScreen(
-          paymentService: paymentService,
-          isDarkMode: widget.isDarkMode,
+  Future<void> _navigateToSubscription() async {
+    try {
+      final debtProvider = Provider.of<DebtProvider>(context, listen: false);
+      final revenueCatService = debtProvider.getRevenueCatService();
+      
+      // Navigate to the subscription screen
+      await Navigator.of(context).push(
+        CupertinoPageRoute(
+          builder: (context) => SubscriptionScreen(
+            revenueCatService: revenueCatService,
+            isDarkMode: widget.isDarkMode,
+          ),
         ),
-      ),
-    ).then((_) => _checkAuthStatus());
+      );
+      
+      // Refresh auth status when returning from subscription screen
+      if (mounted) {
+        await _checkAuthStatus();
+      }
+    } catch (e) {
+      print('Error navigating to subscription screen: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not load subscription information. Please try again.')),
+        );
+      }
+    }
   }
 
   @override

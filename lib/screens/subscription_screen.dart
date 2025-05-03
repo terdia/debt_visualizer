@@ -1,17 +1,18 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/subscription_feature.dart';
 import '../services/auth_service.dart';
-import '../services/payment_service.dart';
+import '../services/revenue_cat_service.dart';
 
 class SubscriptionScreen extends StatefulWidget {
-  final PaymentService paymentService;
+  final RevenueCatService revenueCatService;
   final bool isDarkMode;
 
   const SubscriptionScreen({
-    required this.paymentService,
+    required this.revenueCatService,
     required this.isDarkMode,
     super.key,
   });
@@ -51,14 +52,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       setState(() => _loadingFeatures = true);
       
       // Check if Supabase is available
-      if (!widget.paymentService.isSupabaseAvailable() || widget.paymentService.supabase == null) {
+      if (!widget.revenueCatService.isSupabaseAvailable() || widget.revenueCatService.supabase == null) {
         // Use default features if Supabase is not available
         _setDefaultFeatures();
         return;
       }
       
       // Fetch features from database, ordered by priority (ascending)
-      final response = await widget.paymentService.supabase!
+      final response = await widget.revenueCatService.supabase!
           .from('subscription_features')
           .select()
           .eq('is_active', true)
@@ -167,7 +168,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
     try {
       // First check if we have a valid Supabase instance to handle auth
-      if (!widget.paymentService.isSupabaseAvailable()) {
+      if (!widget.revenueCatService.isSupabaseAvailable()) {
         // Show login/register options instead of proceeding
         setState(() {
           _showAuthOptions = true;
@@ -177,7 +178,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       }
       
       // Check if user is authenticated
-      if (!widget.paymentService.isUserAuthenticated()) {
+      if (!widget.revenueCatService.isUserAuthenticated()) {
         // Show login/register options instead of proceeding
         setState(() {
           _showAuthOptions = true;
@@ -186,10 +187,80 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         return;
       }
       
-      // User is authenticated, proceed with subscription
-      await widget.paymentService.purchaseSubscription();
-      // The purchase flow will be handled asynchronously via purchaseStream
+      // Get offering details
+      final offeringDetails = await widget.revenueCatService.getPremiumOfferingDetails();
       
+      if (offeringDetails == null) {
+        throw Exception('Unable to load subscription details');
+      }
+      
+      // Check if we're in development mode (no package available)
+      if (offeringDetails['package'] == null) {
+        // Development mode - create a simulated subscription
+        print('DEVELOPMENT MODE: Using simulated subscription');
+        
+        // Show dialog to simulate purchase
+        final shouldProceed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Development Mode'),
+            content: const Text(
+              'This is a simulated purchase since RevenueCat products are not yet configured. '
+              'In production, users would be taken to the App Store purchase flow.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Simulate Purchase'),
+              ),
+            ],
+          ),
+        ) ?? false;
+        
+        if (shouldProceed && widget.revenueCatService.supabase != null) {
+          try {
+            // Create a mock subscription in the database
+            final authService = AuthService(widget.revenueCatService.supabase!);
+            await authService.createSubscription(paymentMethodId: 'development_mode_simulation');
+            
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Development mode: Subscription simulated successfully!')),
+              );
+              setState(() => _loading = false);
+            }
+            return;
+          } catch (e) {
+            throw Exception('Failed to simulate subscription: $e');
+          }
+        } else {
+          // User cancelled simulated purchase
+          setState(() => _loading = false);
+          return;
+        }
+      }
+      
+      // User is authenticated, proceed with real subscription purchase
+      final success = await widget.revenueCatService.purchasePackage(offeringDetails['package']);
+      
+      if (success) {
+        // Purchase was successful
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Subscription activated successfully!')),
+          );
+          setState(() => _loading = false);
+        }
+      } else {
+        // Purchase failed or was cancelled
+        setState(() {
+          _error = 'Subscription purchase failed or was cancelled';
+          _loading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -200,36 +271,126 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   
   // Handle login flow
   Future<void> _handleAuth() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      setState(() => _error = 'Please enter both email and password');
-      return;
-    }
-    
     setState(() {
       _loading = true;
       _error = null;
     });
-    
+
     try {
-      final bool success = await widget.paymentService.authenticateUser(
-        email: _emailController.text,
+      if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+        throw Exception('Please enter both email and password');
+      }
+      
+      final success = await widget.revenueCatService.authenticateUser(
+        email: _emailController.text.trim(),
         password: _passwordController.text,
         isLogin: _isLogin,
       );
       
       if (success) {
-        // Auth was successful, now try subscription again
+        // User authenticated successfully
         setState(() {
           _showAuthOptions = false;
+          _loading = false;
         });
+        
+        // Now attempt the subscription again
         await _handleSubscription();
       } else {
-        setState(() => _error = 'Authentication failed. Please try again.');
+        // Authentication failed
+        setState(() {
+          _error = 'Authentication failed';
+          _loading = false;
+        });
       }
     } catch (e) {
-      setState(() => _error = e.toString());
-    } finally {
-      setState(() => _loading = false);
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _handleRestoreSubscription() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      // Check if we're in development mode (no package available)
+      final offeringDetails = await widget.revenueCatService.getPremiumOfferingDetails();
+      if (offeringDetails == null || offeringDetails['package'] == null) {
+        // Development mode - create a simulated subscription
+        print('DEVELOPMENT MODE: Using simulated subscription restore');
+        
+        // Show dialog to simulate restore
+        final shouldProceed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Development Mode'),
+            content: const Text(
+              'This is a simulated restore since RevenueCat products are not yet configured. '
+              'In production, users would be taken to the App Store restore flow.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Simulate Restore'),
+              ),
+            ],
+          ),
+        ) ?? false;
+        
+        if (shouldProceed && widget.revenueCatService.supabase != null) {
+          try {
+            // Create a mock subscription in the database
+            final authService = AuthService(widget.revenueCatService.supabase!);
+            await authService.createSubscription(paymentMethodId: 'development_mode_simulation');
+            
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Development mode: Subscription restored successfully!')),
+              );
+              setState(() => _loading = false);
+            }
+            return;
+          } catch (e) {
+            throw Exception('Failed to simulate subscription restore: $e');
+          }
+        } else {
+          // User cancelled simulated restore
+          setState(() => _loading = false);
+          return;
+        }
+      }
+      
+      // User is authenticated, proceed with real subscription restore
+      final success = await widget.revenueCatService.restorePurchases();
+      
+      if (success) {
+        // Restore was successful
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Subscription restored successfully!')),
+          );
+          setState(() => _loading = false);
+        }
+      } else {
+        // Restore failed or was cancelled
+        setState(() {
+          _error = 'Subscription restore failed or was cancelled';
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
     }
   }
 
@@ -395,13 +556,22 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
-                            Text(
-                              Platform.isIOS ? '\$1.99' : '\$1.99',
-                              style: const TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                            FutureBuilder<Map<String, dynamic>?>(
+                              future: widget.revenueCatService.getPremiumOfferingDetails(),
+                              builder: (context, snapshot) {
+                                String priceText = '\$1.99';
+                                if (snapshot.hasData && snapshot.data != null && snapshot.data!['price'] != null) {
+                                  priceText = snapshot.data!['price'];
+                                }
+                                return Text(
+                                  priceText,
+                                  style: const TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                );
+                              },
                             ),
                             const SizedBox(width: 5),
                             const Text(
@@ -461,26 +631,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   // Restore purchases button
                   Center(
                     child: TextButton(
-                      onPressed: () async {
-                        try {
-                          setState(() => _loading = true);
-                          
-                          // Check if authenticated for restore
-                          if (!widget.paymentService.isUserAuthenticated()) {
-                            setState(() {
-                              _showAuthOptions = true;
-                              _loading = false;
-                            });
-                            return;
-                          }
-                          
-                          await widget.paymentService.restorePurchases();
-                        } catch (e) {
-                          setState(() => _error = e.toString());
-                        } finally {
-                          setState(() => _loading = false);
-                        }
-                      },
+                      onPressed: !_loading ? _handleRestoreSubscription : null,
                       child: Text(
                         'Restore Purchases',
                         style: TextStyle(

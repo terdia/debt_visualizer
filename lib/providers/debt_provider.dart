@@ -5,7 +5,7 @@ import '../services/debt_service.dart';
 import '../services/export_service.dart';
 import '../services/currency_service.dart';
 import '../services/date_service.dart';
-import '../services/payment_service.dart';
+import '../services/revenue_cat_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 
@@ -15,8 +15,10 @@ class DebtProvider extends ChangeNotifier {
   final ExportService _exportService;
   final CurrencyService _currencyService;
   final DateService _dateService;
-  // Lazy-initialized to avoid Supabase client issues
-  PaymentService? _paymentService;
+  // Use the injected Supabase client
+  final SupabaseClient? _supabase;
+  // Lazy-initialized RevenueCatService
+  RevenueCatService? _revenueCatService;
   
   List<DebtProfile> _profiles = [];
   DebtProfile? _selectedProfile;
@@ -26,9 +28,11 @@ class DebtProvider extends ChangeNotifier {
   DebtProvider({
     required DebtRepository repository,
     required DebtService debtService,
+    SupabaseClient? supabaseClient,
   })  : _repository = repository,
         _debtService = debtService,
         _exportService = ExportService(),
+        _supabase = supabaseClient,
         _currencyService = CurrencyService(),
         _dateService = DateService() {
     _initialize();
@@ -353,10 +357,10 @@ class DebtProvider extends ChangeNotifier {
     super.dispose();
   }
   
-  /// Get the payment service for in-app purchases
-  PaymentService getPaymentService() {
-    // Lazy initialize the payment service
-    _paymentService ??= PaymentService(Supabase.instance.client);
-    return _paymentService!;
+  /// Get the RevenueCat service for subscription management
+  RevenueCatService getRevenueCatService() {
+    // Lazy initialize the RevenueCat service using the injected client
+    _revenueCatService ??= RevenueCatService(_supabase);
+    return _revenueCatService!;
   }
 }

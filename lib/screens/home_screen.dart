@@ -218,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 MaterialPageRoute(
                   builder: (context) => SubscriptionScreen(
                     // Pass only payment service - auth will be handled in subscription screen
-                    paymentService: Provider.of<DebtProvider>(context, listen: false).getPaymentService(),
+                    revenueCatService: Provider.of<DebtProvider>(context, listen: false).getRevenueCatService(),
                     isDarkMode: _isDarkMode,
                   ),
                 ),
