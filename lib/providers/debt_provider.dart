@@ -1,4 +1,6 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:money_formatter/money_formatter.dart';
 import '../models/debt_profile.dart';
 import '../repositories/debt_repository.dart';
 import '../services/debt_service.dart';
@@ -173,7 +175,7 @@ class DebtProvider extends ChangeNotifier {
     
     // Check if payment covers interest (prevent infinite loop)
     if (monthlyPayment <= remainingDebt * interestRate) {
-      throw Exception('Monthly payment too low to cover interest');
+      return double.infinity;
     }
     
     double totalPaid = 0;
@@ -230,20 +232,30 @@ class DebtProvider extends ChangeNotifier {
 
   // Currency formatting methods
   String formatCurrency(double amount, Currency currency, {bool compact = false}) {
+    // Configure the money formatter
+    final MoneyFormatter formatter = MoneyFormatter(
+      amount: amount,
+      settings: MoneyFormatterSettings(
+        symbol: currency.symbol,
+        thousandSeparator: ',',
+        decimalSeparator: '.',
+        symbolAndNumberSeparator: '',
+        fractionDigits: compact ? 0 : 2,
+      ),
+    );
+    
     if (compact) {
-      // For compact display, use short format (K, M, B)
-      final formatter = NumberFormat.compactCurrency(
-        symbol: currency.symbol,
-        decimalDigits: 0,
-      );
-      return formatter.format(amount);
+      // For compact display, use compact format with no decimals
+      if (amount >= 1000000) {
+        return '${currency.symbol}${(amount / 1000000).toStringAsFixed(1)}M';
+      } else if (amount >= 1000) {
+        return '${currency.symbol}${(amount / 1000).toStringAsFixed(1)}K';
+      } else {
+        return formatter.output.symbolOnLeft;
+      }
     } else {
-      // Standard currency formatting
-      final formatter = NumberFormat.currency(
-        symbol: currency.symbol,
-        decimalDigits: 2,
-      );
-      return formatter.format(amount);
+      // Standard currency formatting with full precision
+      return formatter.output.symbolOnLeft;
     }
   }
 

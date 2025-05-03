@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../models/debt_profile.dart';
@@ -45,11 +46,20 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
     super.dispose();
   }
 
+  // Helper method to parse numbers that handles comma decimals
+  double _parseNumber(String text) {
+    if (text.isEmpty) return 0;
+    if (text.contains(',')) {
+      text = text.replaceAll(',', '.');
+    }
+    return double.parse(text);
+  }
+
   void _updateOptimization() {
     final selectedProfiles = _selectedProfiles;
     if (selectedProfiles.isEmpty) return;
 
-    final extraAmount = double.tryParse(_extraPaymentController.text) ?? 0;
+    final extraAmount = _parseNumber(_extraPaymentController.text);
     
     // Create a new map to force update
     final newOptimizations = _comparisonService.optimizePayments(
@@ -337,6 +347,11 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d*[.,]?\d*$'),  // Allow both dot and comma as decimal separators
+                                ),
+                              ],
                               onChanged: (value) {
                                 _updateOptimization();
                               },

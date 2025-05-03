@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/debt_profile.dart';
-import '../../utils/currency_formatter.dart';
+import '../../providers/debt_provider.dart';
 
 class WhatIfCalculator extends StatelessWidget {
   final DebtProfile profile;
@@ -123,7 +124,7 @@ class WhatIfCalculator extends StatelessWidget {
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: Text(
-                            CurrencyFormatter.format(
+                            Provider.of<DebtProvider>(context, listen: false).formatCurrency(
                               extraPayment,
                               profile.currency,
                             ),
@@ -160,14 +161,15 @@ class WhatIfCalculator extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '${CurrencyFormatter.format(0, profile.currency)}',
+                          Provider.of<DebtProvider>(context, listen: false).formatCurrency(0, profile.currency),
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.7),
                             fontSize: 12,
                           ),
                         ),
                         Text(
-                          '${CurrencyFormatter.format(profile.monthlyPayment * 5, profile.currency)}',
+                          Provider.of<DebtProvider>(context, listen: false)
+                              .formatCurrency(profile.monthlyPayment * 5, profile.currency),
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.7),
                             fontSize: 12,
@@ -199,7 +201,7 @@ class WhatIfCalculator extends StatelessWidget {
                     Expanded(
                       child: _buildResultCard(
                         title: 'INTEREST SAVED',
-                        value: CurrencyFormatter.format(
+                        value: Provider.of<DebtProvider>(context, listen: false).formatCurrency(
                           moneySaved,
                           profile.currency,
                         ),

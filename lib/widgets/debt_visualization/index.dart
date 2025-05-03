@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
-import '../../providers/debt_provider.dart';
+import 'package:provider/provider.dart';
 import '../../models/debt_profile.dart';
-import 'progress_card.dart';
-import 'stat_card.dart';
-import 'payoff_chart.dart';
+import '../../providers/debt_provider.dart';
 import 'what_if_calculator.dart';
+import 'progress_card.dart';
+import 'payoff_chart.dart';
 
 /// Main widget that combines all debt visualization components
 class DebtVisualizationView extends StatelessWidget {
@@ -103,7 +103,8 @@ class DebtVisualizationView extends StatelessWidget {
       // Monthly payment
       {
         'title': 'Monthly Payment',
-        'value': profile.currency.symbol + monthlyPayment.toStringAsFixed(0),
+        'value': Provider.of<DebtProvider>(context, listen: false)
+            .formatCurrency(monthlyPayment, profile.currency),
         'subtitle': 'Current payment',
         'icon': Icons.calendar_today,
         'colors': gradients[0],
@@ -111,7 +112,8 @@ class DebtVisualizationView extends StatelessWidget {
       // Interest cost
       {
         'title': 'Interest Cost',
-        'value': profile.currency.symbol + interestPaid.toStringAsFixed(0),
+        'value': Provider.of<DebtProvider>(context, listen: false)
+            .formatCurrency(interestPaid, profile.currency),
         'subtitle': 'Total interest',
         'icon': Icons.attach_money,
         'colors': gradients[1],
@@ -286,6 +288,6 @@ class DebtVisualizationView extends StatelessWidget {
   
   /// Returns a formatter for month/year date format
   DateFormat _getMonthYearFormatter() {
-    return DateFormat('MMMM yyyy');
+    return DateFormat('MMM yyyy'); // Using 3-letter abbreviated month format
   }
 }

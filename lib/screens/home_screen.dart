@@ -272,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     label: 'Compare',
                   ),
                   BottomNavigationBarItem(
-                    icon: Icon(CupertinoIcons.money_dollar_circle_fill),
+                    icon: Icon(Icons.calculate), // Using Material icon instead
                     label: 'Calculator',
                   ),
                   BottomNavigationBarItem(

@@ -84,6 +84,13 @@ class CurrencyService {
       return _getDefaultCurrencies();
     }
   }
+  
+  /// Get a list of currencies synchronously
+  /// This is a convenience method that returns a default list of currencies
+  /// without making any network requests
+  List<Currency> getCurrencies() {
+    return _getDefaultCurrencies();
+  }
 
   /// Get currency by code
   Future<Currency?> getCurrencyByCode(String code) async {

@@ -172,7 +172,7 @@ class _DebtInputFormState extends State<DebtInputForm> {
                       ),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d*\.?\d*$'),
+                          RegExp(r'^\d*[.,]?\d*$'),  // Allow both dot and comma as decimal separators
                         ),
                       ],
                       validator: _validateNumber,
@@ -188,7 +188,7 @@ class _DebtInputFormState extends State<DebtInputForm> {
                       ),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d*\.?\d*$'),
+                          RegExp(r'^\d*[.,]?\d*$'),  // Allow both dot and comma as decimal separators
                         ),
                       ],
                       validator: _validateNumber,
@@ -208,7 +208,7 @@ class _DebtInputFormState extends State<DebtInputForm> {
                       ),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d*\.?\d*$'),
+                          RegExp(r'^\d*[.,]?\d*$'),  // Allow both dot and comma as decimal separators
                         ),
                       ],
                       validator: _validateNumber,
@@ -252,18 +252,20 @@ class _DebtInputFormState extends State<DebtInputForm> {
                       ),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d*\.?\d*$'),
+                          RegExp(r'^\d*[.,]?\d*$'),  // Allow both dot and comma as decimal separators
                         ),
                       ],
                       validator: (value) {
                         if (value?.isEmpty ?? true) return null;
-                        if (double.tryParse(value!) == null) {
+                        try {
+                          final number = _parseNumber(value!);
+                          if (number <= 0) {
+                            return 'Must be greater than 0';
+                          }
+                          return null;
+                        } catch (e) {
                           return 'Enter a valid number';
                         }
-                        if (double.parse(value) <= 0) {
-                          return 'Must be greater than 0';
-                        }
-                        return null;
                       },
                     ),
                   ),
@@ -278,22 +280,27 @@ class _DebtInputFormState extends State<DebtInputForm> {
                 ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(
-                    RegExp(r'^\d*\.?\d*$'),
+                    RegExp(r'^\d*[.,]?\d*$'),  // Allow both dot and comma as decimal separators
                   ),
                 ],
                 validator: (value) {
                   if (value?.isEmpty ?? true) return 'This field is required';
-                  if (double.tryParse(value!) == null) {
+                  
+                  try {
+                    final number = _parseNumber(value!);
+                    if (number < 0) {
+                      return 'Must be 0 or greater';
+                    }
+                    if (_totalDebtController.text.isNotEmpty) {
+                      final totalDebt = _parseNumber(_totalDebtController.text);
+                      if (number > totalDebt) {
+                        return 'Cannot exceed total debt';
+                      }
+                    }
+                    return null;
+                  } catch (e) {
                     return 'Enter a valid number';
                   }
-                  if (double.parse(value) < 0) {
-                    return 'Must be 0 or greater';
-                  }
-                  if (_totalDebtController.text.isNotEmpty &&
-                      double.parse(value) > double.parse(_totalDebtController.text)) {
-                    return 'Cannot exceed total debt';
-                  }
-                  return null;
                 },
               ),
               const SizedBox(height: 16),
@@ -322,7 +329,11 @@ class _DebtInputFormState extends State<DebtInputForm> {
               ),
               const SizedBox(width: 16),
               FilledButton(
-                onPressed: _submitForm,
+                onPressed: () {
+                  // Dismiss keyboard before submitting form
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  _submitForm();
+                },
                 style: FilledButton.styleFrom(
                   backgroundColor: Theme.of(context).brightness == Brightness.dark 
                     ? const Color(0xFF7B1FA2) 
@@ -650,9 +661,21 @@ class _DebtInputFormState extends State<DebtInputForm> {
 
   String? _validateNumber(String? value) {
     if (value?.isEmpty ?? true) return 'This field is required';
-    if (double.tryParse(value!) == null) return 'Must be a valid number';
-    if (double.parse(value) <= 0) return 'Must be greater than 0';
-    return null;
+    
+    try {
+      final number = _parseNumber(value!);
+      if (number <= 0) return 'Must be greater than 0';
+      return null;
+    } catch (e) {
+      return 'Must be a valid number';
+    }
+  }
+
+  double _parseNumber(String text) {
+    if (text.contains(',')) {
+      text = text.replaceAll(',', '.');
+    }
+    return double.parse(text);
   }
 
   void _submitForm() {
@@ -668,13 +691,13 @@ class _DebtInputFormState extends State<DebtInputForm> {
       id: widget.initialProfile?.id,
       name: _nameController.text,
       description: _descriptionController.text,
-      totalDebt: double.parse(_totalDebtController.text),
-      interestRate: double.parse(_interestRateController.text),
-      monthlyPayment: double.parse(_monthlyPaymentController.text),
+      totalDebt: _parseNumber(_totalDebtController.text),
+      interestRate: _parseNumber(_interestRateController.text),
+      monthlyPayment: _parseNumber(_monthlyPaymentController.text),
       hourlyWage: _hourlyWageController.text.isNotEmpty
-          ? double.parse(_hourlyWageController.text)
+          ? _parseNumber(_hourlyWageController.text)
           : null,
-      amountPaid: double.parse(_amountPaidController.text),
+      amountPaid: _parseNumber(_amountPaidController.text),
       currency: _selectedCurrency!,
     );
 

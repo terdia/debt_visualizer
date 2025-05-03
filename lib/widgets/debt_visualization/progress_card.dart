@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/debt_profile.dart';
-import '../../utils/currency_formatter.dart';
+import '../../providers/debt_provider.dart';
 
 class ProgressCard extends StatelessWidget {
   final DebtProfile profile;
@@ -133,7 +134,8 @@ class ProgressCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          CurrencyFormatter.format(profile.amountPaid, profile.currency),
+                          Provider.of<DebtProvider>(context, listen: false)
+                              .formatCurrency(profile.amountPaid, profile.currency),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -154,7 +156,8 @@ class ProgressCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          CurrencyFormatter.format(profile.totalDebt, profile.currency),
+                          Provider.of<DebtProvider>(context, listen: false)
+                              .formatCurrency(profile.totalDebt, profile.currency),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,

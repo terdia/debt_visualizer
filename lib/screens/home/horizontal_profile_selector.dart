@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import '../../providers/debt_provider.dart';
 import '../../models/debt_profile.dart';
 import 'dialogs.dart';
@@ -156,18 +157,62 @@ class HorizontalProfileSelector extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Profile name
-                  Text(
-                    profile.name,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected
-                          ? Colors.white
-                          : (isDarkMode ? Colors.white : Colors.black87),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  // Profile name and edit button row
+                  Row(
+                    children: [
+                      // Profile name in constrained space
+                      Expanded(
+                        child: Text(
+                          profile.name,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected
+                                ? Colors.white
+                                : (isDarkMode ? Colors.white : Colors.black87),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      // Buttons in a row
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Edit button
+                          _buildActionButton(
+                            icon: CupertinoIcons.pencil,
+                            color: isSelected 
+                                ? Colors.white.withOpacity(0.3) 
+                                : isDarkMode 
+                                    ? Colors.grey.shade700
+                                    : Colors.grey.shade300,
+                            iconColor: isSelected
+                                ? Colors.white
+                                : isDarkMode
+                                    ? Colors.white.withOpacity(0.8)
+                                    : Colors.grey.shade800,
+                            onTap: () => onEditProfile(context: context, profile: profile),
+                          ),
+                          const SizedBox(width: 4),
+                          // Delete button
+                          _buildActionButton(
+                            icon: CupertinoIcons.trash,
+                            color: isSelected 
+                                ? Colors.white.withOpacity(0.3) 
+                                : isDarkMode 
+                                    ? Colors.grey.shade700
+                                    : Colors.grey.shade300,
+                            iconColor: isSelected
+                                ? Colors.white
+                                : isDarkMode
+                                    ? Colors.white.withOpacity(0.8)
+                                    : Colors.grey.shade800,
+                            onTap: () => onDeleteProfile(context: context, provider: provider, profileId: profile.id),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   
@@ -175,8 +220,9 @@ class HorizontalProfileSelector extends StatelessWidget {
                   Row(
                     children: [
                       _buildInfoChip(
-                        icon: CupertinoIcons.money_dollar,
-                        label: '\$${profile.totalDebt.toStringAsFixed(0)}',
+                        icon: Icons.account_balance_wallet, // Generic wallet icon that's currency-neutral
+                        label: Provider.of<DebtProvider>(context, listen: false)
+                            .formatCurrency(profile.totalDebt, profile.currency, compact: true),
                         isSelected: isSelected,
                       ),
                       const SizedBox(width: 8),
@@ -191,47 +237,7 @@ class HorizontalProfileSelector extends StatelessWidget {
               ),
             ),
             
-            // Action buttons
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Row(
-                children: [
-                  // Edit button
-                  _buildActionButton(
-                    icon: CupertinoIcons.pencil,
-                    color: isSelected 
-                        ? Colors.white.withOpacity(0.3) 
-                        : isDarkMode 
-                            ? Colors.grey.shade700
-                            : Colors.grey.shade300,
-                    iconColor: isSelected
-                        ? Colors.white
-                        : isDarkMode
-                            ? Colors.white70
-                            : Colors.black54,
-                    onTap: () => onEditProfile(context: context, profile: profile),
-                  ),
-                  const SizedBox(width: 4),
-                  
-                  // Delete button
-                  _buildActionButton(
-                    icon: CupertinoIcons.trash,
-                    color: isSelected 
-                        ? Colors.white.withOpacity(0.3) 
-                        : isDarkMode 
-                            ? Colors.grey.shade700
-                            : Colors.grey.shade300,
-                    iconColor: isSelected
-                        ? Colors.white
-                        : isDarkMode
-                            ? Colors.white70
-                            : Colors.black54,
-                    onTap: () => onDeleteProfile(context: context, provider: provider, profileId: profile.id),
-                  ),
-                ],
-              ),
-            ),
+            // No longer needed - buttons are inline with title
           ],
         ),
       ),
