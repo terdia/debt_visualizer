@@ -39,6 +39,7 @@ build/
 .DS_Store
 *.pem
 **/macos/Flutter/GeneratedPluginRegistrant.swift
+SubscriptionKey_ A4C3CEA1.p8
 
 # Dependencies
 node_modules/

@@ -1,4 +1,4 @@
-package com.example.debt_visualizer
+package com.debtfree.debt_visualizer
 
 import io.flutter.embedding.android.FlutterActivity
 
