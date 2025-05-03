@@ -21,6 +21,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final _formKey = GlobalKey<FormState>();
   final _debtService = DebtService();
   final _currencyService = CurrencyService();
+  final _scrollController = ScrollController();
+  final _resultsKey = GlobalKey(); // Key for the results section
   
   late final TextEditingController _debtController;
   late final TextEditingController _interestController;
@@ -45,12 +47,38 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _availableCurrencies = _currencyService.getCurrencies();
   }
 
+  // Scroll to the results section using a simpler approach
+  void _scrollToResults() {
+    if (_scrollController.hasClients) {
+      // Use a small delay to ensure the layout is complete
+      Future.delayed(const Duration(milliseconds: 100), () {
+        // Scroll to a position that will show the results
+        // This is a simpler approach that doesn't require complex rendering calculations
+        final currentPosition = _scrollController.position.pixels;
+        final maxScrollExtent = _scrollController.position.maxScrollExtent;
+        
+        // Scroll down enough to show the results (about halfway down from current position)
+        final targetPosition = currentPosition + 400;
+        
+        // Make sure we don't scroll beyond the max extent
+        final scrollTo = targetPosition.clamp(0.0, maxScrollExtent);
+        
+        _scrollController.animateTo(
+          scrollTo,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      });
+    }
+  }
+  
   @override
   void dispose() {
     _debtController.dispose();
     _interestController.dispose();
     _paymentController.dispose();
     _extraPaymentController.dispose();
+    _scrollController.dispose(); // Dispose the scroll controller
     super.dispose();
   }
 
@@ -77,6 +105,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _payoffData = _debtService.generatePayoffData(profile, extraPayment: extraPayment);
       _showResults = true;
     });
+    
+    // Scroll to results after setState completes and UI is updated
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_showResults) {
+        _scrollToResults();
+      }
+    });
   }
 
   @override
@@ -94,6 +129,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         // Set resizeToAvoidBottomInset to true to handle keyboard properly
         resizeToAvoidBottomInset: true,
         body: CustomScrollView(
+          controller: _scrollController, // Add the scroll controller
           slivers: [
             SliverAppBar.medium(
               title: const Text('Debt Calculator'),
@@ -339,6 +375,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ),
             ),
             if (_showResults) SliverToBoxAdapter(
+              key: _resultsKey, // Add key to the results section
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                 child: _buildResults(theme, isDarkMode),
