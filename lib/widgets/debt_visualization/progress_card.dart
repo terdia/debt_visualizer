@@ -19,22 +19,30 @@ class ProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Create a vibrant gradient based on progress
-    final progressColor = HSLColor.fromAHSL(
-      1.0,
-      280 * (1 - progress / 100), // Hue shifts from purple to blue as progress increases
-      0.8,
-      0.5,
-    ).toColor();
-    
-    final secondaryColor = HSLColor.fromAHSL(
-      1.0,
-      280 * (1 - progress / 100) + 20, // Slight offset for secondary color
-      0.7,
-      0.6,
-    ).toColor();
+    // Use Consumer to always get the latest profile data
+    return Consumer<DebtProvider>(builder: (context, debtProvider, _) {
+      // Get the most up-to-date profile data (matching the profile passed to this widget)
+      final DebtProfile currentProfile = debtProvider.profiles.firstWhere(
+        (p) => p.id == profile.id,
+        orElse: () => profile, // Fallback to passed profile if not found
+      );
+      
+      // Create a vibrant gradient based on progress
+      final progressColor = HSLColor.fromAHSL(
+        1.0,
+        280 * (1 - progress / 100), // Hue shifts from purple to blue as progress increases
+        0.8,
+        0.5,
+      ).toColor();
+      
+      final secondaryColor = HSLColor.fromAHSL(
+        1.0,
+        280 * (1 - progress / 100) + 20, // Slight offset for secondary color
+        0.7,
+        0.6,
+      ).toColor();
 
-    return Card(
+      return Card(
       elevation: 12,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       clipBehavior: Clip.antiAlias,
@@ -134,8 +142,7 @@ class ProgressCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          Provider.of<DebtProvider>(context, listen: false)
-                              .formatCurrency(profile.amountPaid, profile.currency),
+                          debtProvider.formatCurrency(currentProfile.amountPaid, currentProfile.currency),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -156,8 +163,7 @@ class ProgressCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          Provider.of<DebtProvider>(context, listen: false)
-                              .formatCurrency(profile.totalDebt, profile.currency),
+                          debtProvider.formatCurrency(currentProfile.totalDebt, currentProfile.currency),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -205,5 +211,6 @@ class ProgressCard extends StatelessWidget {
         ),
       ),
     );
+      });
   }
 }

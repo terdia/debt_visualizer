@@ -51,6 +51,7 @@ class MyApp extends StatelessWidget {
         debtService: DebtService(),
       ),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Debt Visualizer',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(

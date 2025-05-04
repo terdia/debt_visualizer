@@ -221,7 +221,7 @@ class HorizontalProfileSelector extends StatelessWidget {
                     children: [
                       _buildInfoChip(
                         icon: Icons.account_balance_wallet, // Generic wallet icon that's currency-neutral
-                        label: Provider.of<DebtProvider>(context, listen: false)
+                        label: Provider.of<DebtProvider>(context)
                             .formatCurrency(profile.totalDebt, profile.currency, compact: true),
                         isSelected: isSelected,
                       ),

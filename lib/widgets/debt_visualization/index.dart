@@ -21,9 +21,14 @@ class DebtVisualizationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use the provider for interactive elements
+    // Use the provider for interactive elements and to get the latest profile data
     return Consumer<DebtProvider>(
       builder: (context, provider, _) {
+        // Get the most current version of the profile directly from the provider's data store
+        final currentProfile = provider.profiles.firstWhere(
+          (p) => p.id == profile.id,
+          orElse: () => profile, // Fallback to the passed profile if not found
+        );
         return SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -32,22 +37,22 @@ class DebtVisualizationView extends StatelessWidget {
               children: [
                 // Progress visualization
                 ProgressCard(
-                  profile: profile,
-                  progress: provider.getProgressPercentage(),
-                  motivationalMessage: provider.getMotivationalMessage(),
+                  profile: currentProfile,
+                  progress: provider.getProgressPercentage(currentProfile),
+                  motivationalMessage: provider.getMotivationalMessage(currentProfile),
                   isDarkMode: isDarkMode,
                 ),
                 
                 const SizedBox(height: 24),
                 
                 // Statistics grid
-                _buildStatisticsGrid(context, provider),
+                _buildStatisticsGrid(context, provider, currentProfile),
                 
                 const SizedBox(height: 24),
                 
                 // Payoff chart visualization
                 PayoffChart(
-                  profile: profile,
+                  profile: currentProfile,
                   extraPayment: provider.extraPayment,
                   isDarkMode: isDarkMode,
                 ),
@@ -56,12 +61,12 @@ class DebtVisualizationView extends StatelessWidget {
                 
                 // What-if calculator for simulating extra payments
                 WhatIfCalculator(
-                  profile: profile,
+                  profile: currentProfile,
                   extraPayment: provider.extraPayment,
                   onExtraPaymentChanged: provider.setExtraPayment,
-                  debtFreeDate: provider.getDebtFreeDate(),
-                  monthsToPayoff: provider.getMonthsToPayoff(),
-                  baseMonthsToPayoff: provider.getBaseMonthsToPayoff(),
+                  debtFreeDate: provider.getDebtFreeDate(currentProfile),
+                  monthsToPayoff: provider.getMonthsToPayoff(currentProfile),
+                  baseMonthsToPayoff: provider.getBaseMonthsToPayoff(currentProfile),
                   isDarkMode: isDarkMode,
                 ),
               ],
@@ -73,7 +78,7 @@ class DebtVisualizationView extends StatelessWidget {
   }
   
   /// Builds a grid of statistics cards with varying colors
-  Widget _buildStatisticsGrid(BuildContext context, DebtProvider provider) {
+  Widget _buildStatisticsGrid(BuildContext context, DebtProvider provider, DebtProfile currentProfile) {
     // For a visually interesting design, use different gradients for each card
     final gradients = [
       // Purple gradient
@@ -88,11 +93,11 @@ class DebtVisualizationView extends StatelessWidget {
       [const Color(0xFFFF9800), const Color(0xFFE65100)],
     ];
 
-    final monthlyPayment = profile.monthlyPayment;
-    final interestPaid = provider.calculateTotalInterest();
-    final monthsRemaining = provider.getMonthsToPayoff();
-    final debtFreeDate = provider.getDebtFreeDate();
-    final workHours = provider.calculateWorkHoursToPayOff();
+    final monthlyPayment = currentProfile.monthlyPayment;
+    final interestPaid = provider.calculateTotalInterest(currentProfile);
+    final monthsRemaining = provider.getMonthsToPayoff(currentProfile);
+    final debtFreeDate = provider.getDebtFreeDate(currentProfile);
+    final workHours = provider.calculateWorkHoursToPayOff(currentProfile);
     
     // Format the debt-free date
     final dateFormatter = _getMonthYearFormatter();
@@ -103,8 +108,8 @@ class DebtVisualizationView extends StatelessWidget {
       // Monthly payment
       {
         'title': 'Monthly Payment',
-        'value': Provider.of<DebtProvider>(context, listen: false)
-            .formatCurrency(monthlyPayment, profile.currency),
+        'value': Provider.of<DebtProvider>(context)
+            .formatCurrency(monthlyPayment, currentProfile.currency),
         'subtitle': 'Current payment',
         'icon': Icons.calendar_today,
         'colors': gradients[0],
@@ -112,8 +117,8 @@ class DebtVisualizationView extends StatelessWidget {
       // Interest cost
       {
         'title': 'Interest Cost',
-        'value': Provider.of<DebtProvider>(context, listen: false)
-            .formatCurrency(interestPaid, profile.currency),
+        'value': Provider.of<DebtProvider>(context)
+            .formatCurrency(interestPaid, currentProfile.currency),
         'subtitle': 'Total interest',
         'icon': Icons.attach_money,
         'colors': gradients[1],
