@@ -25,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   late AnimationController _controller;
   late Animation<double> _animation;
   bool _isDarkMode = false; // Track the theme mode state
+  bool _isProfileSelectorVisible = true; // Track profile selector visibility
   
   // Navigation state
   int _currentIndex = 0;
@@ -96,12 +97,332 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
             child: Column(
               children: [
-                // Horizontal profile selector at the top
-                HorizontalProfileSelector(
-                  provider: provider,
-                  isDarkMode: _isDarkMode,
-                  onDeleteProfile: showDeleteConfirmation,
-                  onEditProfile: _showEditProfile,
+                // Header with profile toggle button
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Button to toggle profile visibility
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _isProfileSelectorVisible = !_isProfileSelectorVisible;
+                            });
+                            // Force rebuild of screens to update in parent widget
+                            _updateScreens();
+                          },
+                          splashColor: Colors.purple.withOpacity(0.1),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                            child: Row(
+                          children: [
+                            Icon(
+                              _isProfileSelectorVisible
+                                ? CupertinoIcons.chevron_down
+                                : CupertinoIcons.chevron_right,
+                              color: _isDarkMode ? Colors.white70 : Colors.black54,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'MY PROFILES',
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                color: _isDarkMode ? Colors.white70 : Colors.black54,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      // Add profile button always visible
+                      GestureDetector(
+                        onTap: () => showAddDebtProfile(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF6A1B9A), Color(0xFF9C27B0)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF9C27B0).withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(
+                                CupertinoIcons.add,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'NEW',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Profile card section with explicit visibility for proper animation
+                Visibility(
+                  visible: _isProfileSelectorVisible,
+                  maintainState: true,
+                  maintainAnimation: true,
+                  maintainSize: false,
+                  child: Column(
+                    children: [
+                      // Scrollable profile cards with correct height
+                      Container(
+                        height: 120,
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          itemCount: provider.profiles.length,
+                          itemBuilder: (context, index) {
+                            final profile = provider.profiles[index];
+                            final isSelected = profile.id == provider.selectedProfile?.id;
+                            
+                            // Build profile card directly instead of using HorizontalProfileSelector
+                            return GestureDetector(
+                              onTap: () => provider.selectProfile(profile),
+                              child: Container(
+                                width: 200,
+                                margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  gradient: isSelected
+                                    ? const LinearGradient(
+                                        colors: [Color(0xFF7B1FA2), Color(0xFF9C27B0)],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      )
+                                    : LinearGradient(
+                                        colors: _isDarkMode
+                                            ? [Colors.grey.shade800, Colors.grey.shade900]
+                                            : [Colors.grey.shade200, Colors.grey.shade300],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              profile.name,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                color: isSelected
+                                                    ? Colors.white
+                                                    : _isDarkMode
+                                                        ? Colors.white
+                                                        : Colors.black87,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              // Edit button
+                                              GestureDetector(
+                                                onTap: () => _showEditProfile(context: context, profile: profile),
+                                                child: Container(
+                                                  width: 28,
+                                                  height: 28,
+                                                  decoration: BoxDecoration(
+                                                    color: isSelected 
+                                                        ? Colors.white.withOpacity(0.3) 
+                                                        : _isDarkMode 
+                                                            ? Colors.grey.shade700
+                                                            : Colors.grey.shade300,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Icon(
+                                                    CupertinoIcons.pencil,
+                                                    size: 14,
+                                                    color: isSelected
+                                                        ? Colors.white
+                                                        : _isDarkMode
+                                                            ? Colors.white.withOpacity(0.8)
+                                                            : Colors.grey.shade800,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              // Delete button
+                                              GestureDetector(
+                                                onTap: () => showDeleteConfirmation(context: context, provider: provider, profileId: profile.id),
+                                                child: Container(
+                                                  width: 28,
+                                                  height: 28,
+                                                  decoration: BoxDecoration(
+                                                    color: isSelected 
+                                                        ? Colors.white.withOpacity(0.3) 
+                                                        : _isDarkMode 
+                                                            ? Colors.grey.shade700
+                                                            : Colors.grey.shade300,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Icon(
+                                                    CupertinoIcons.trash,
+                                                    size: 14,
+                                                    color: isSelected
+                                                        ? Colors.white
+                                                        : _isDarkMode
+                                                            ? Colors.white.withOpacity(0.8)
+                                                            : Colors.grey.shade800,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      
+                                      // Debt amount and interest rate
+                                      Row(
+                                        children: [
+                                          // Debt amount chip
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: isSelected
+                                                  ? Colors.white.withOpacity(0.2)
+                                                  : _isDarkMode
+                                                      ? Colors.black.withOpacity(0.2)
+                                                      : Colors.grey.withOpacity(0.15),
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.account_balance_wallet,
+                                                  size: 12,
+                                                  color: isSelected
+                                                      ? Colors.white
+                                                      : _isDarkMode
+                                                          ? Colors.white70
+                                                          : Colors.black54,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  Provider.of<DebtProvider>(context)
+                                                      .formatCurrency(profile.totalDebt, profile.currency, compact: true),
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: isSelected
+                                                        ? Colors.white
+                                                        : _isDarkMode
+                                                            ? Colors.white70
+                                                            : Colors.black54,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          // Interest rate chip
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: isSelected
+                                                  ? Colors.white.withOpacity(0.2)
+                                                  : _isDarkMode
+                                                      ? Colors.black.withOpacity(0.2)
+                                                      : Colors.grey.withOpacity(0.15),
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  CupertinoIcons.percent,
+                                                  size: 12,
+                                                  color: isSelected
+                                                      ? Colors.white
+                                                      : _isDarkMode
+                                                          ? Colors.white70
+                                                          : Colors.black54,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  '${profile.interestRate}%',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: isSelected
+                                                        ? Colors.white
+                                                        : _isDarkMode
+                                                            ? Colors.white70
+                                                            : Colors.black54,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      // Divider
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Divider(
+                          color: _isDarkMode ? Colors.white24 : Colors.black12,
+                          height: 1,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 
                 // Main content area - expanded to take remaining space
